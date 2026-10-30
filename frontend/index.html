@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Khám phá phim, chia sẻ góc nhìn và tìm bộ phim hợp với tâm trạng cùng Cinéphile."
+    />
+    <meta name="theme-color" content="#101412" />
+    <title>Cinéphile — Một bộ phim, một thế giới</title>
+    <link
+      rel="icon"
+      href="/static/assets/poster-placeholder.svg"
+      type="image/svg+xml"
+    />
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#catalog">Đến danh sách phim</a>
+    <header class="header">
+      <a href="#" class="brand" aria-label="Cinéphile trang chủ"
+        ><span class="brand-mark" aria-hidden="true">c<span>•</span></span
+        >cinéphile<span class="brand-dot">.</span></a
+      >
+      <nav aria-label="Điều hướng chính">
+        <button class="nav-link active" id="explore-nav">Khám phá</button>
+        <button class="nav-link" id="watchlist-nav">
+          Tủ phim <span class="tiny-dot"></span>
+        </button>
+        <button class="nav-link" id="chat-nav">
+          Ciné bot <span class="new-tag">AI</span>
+        </button>
+      </nav>
+      <button class="account-button" id="account-button">
+        <span class="user-icon" aria-hidden="true">♙</span
+        ><span id="account-label">Đăng nhập</span
+        ><span aria-hidden="true">↗</span>
+      </button>
+    </header>
+
+    <main>
+      <section class="hero" id="hero" aria-labelledby="hero-heading">
+        <img
+          class="hero-image"
+          src="https://image.tmdb.org/t/p/original/xJHokMbljvjADYdit5fK5VQsXEG.jpg"
+          alt="Một thế giới xa xôi trong bộ phim Interstellar"
+          fetchpriority="high"
+        />
+        <div class="hero-shade"></div>
+        <div class="hero-content">
+          <div class="eyebrow">
+            <span></span> DÀNH CHO NHỮNG NGƯỜI YÊU ĐIỆN ẢNH
+          </div>
+          <h1 id="hero-heading">
+            Một bộ phim.<br />Một <em>thế giới mới.</em>
+          </h1>
+          <p>
+            Khám phá những câu chuyện đáng xem.<br />Chia sẻ góc nhìn của bạn,
+            tìm bộ phim dành riêng cho mình.
+          </p>
+          <div class="hero-actions">
+            <button class="button primary" id="discover-button">
+              Tìm phim tiếp theo <span aria-hidden="true">↗</span></button
+            ><button class="button ghost" id="hero-chat-button">
+              <span class="sparkle" aria-hidden="true">✦</span> Hỏi Ciné bot
+            </button>
+          </div>
+          <div class="hero-footnote">
+            <span class="overlap-circles" aria-hidden="true"
+              ><i>◉</i><i>✦</i><i>c.</i></span
+            ><span>Điện ảnh hay hơn khi được sẻ chia.</span>
+          </div>
+        </div>
+        <button class="hero-feature" id="hero-movie-button">
+          <span class="feature-line"></span
+          ><span
+            ><small>TRÊN MÀN ẢNH</small
+            ><strong>Interstellar <span>↗</span></strong
+            ><span class="feature-meta"
+              >2014 &nbsp; · &nbsp; Khoa học viễn tưởng</span
+            ></span
+          >
+        </button>
+        <span class="hero-index" aria-hidden="true"
+          >01 <span>/ CINÉ SELECTION</span></span
+        >
+      </section>
+
+      <section
+        class="catalog section-wrap"
+        id="catalog"
+        aria-labelledby="catalog-title"
+      >
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow muted" id="catalog-kicker">
+              CHỌN MỘT CÂU CHUYỆN
+            </div>
+            <h2 id="catalog-title">Hôm nay, xem gì?</h2>
+          </div>
+          <span class="catalog-status" id="catalog-status">Đang kết nối…</span>
+        </div>
+        <div class="toolbar">
+          <label class="search-field"
+            ><span aria-hidden="true">⌕</span
+            ><input
+              id="search-input"
+              type="search"
+              placeholder="Tìm tên bộ phim bạn đang nghĩ đến…"
+              maxlength="120"
+              aria-label="Tìm phim theo tên"
+            /><kbd>/</kbd></label
+          >
+          <label class="select-field"
+            ><span class="sr-only">Năm phát hành</span
+            ><select id="year-filter">
+              <option value="">Mọi năm</option>
+            </select></label
+          >
+          <label class="select-field sort-field"
+            ><span aria-hidden="true">↕</span
+            ><span class="sr-only">Sắp xếp</span
+            ><select id="sort-filter">
+              <option value="popular">Phổ biến</option>
+              <option value="rating">Điểm cao nhất</option>
+              <option value="newest">Mới phát hành</option>
+            </select></label
+          >
+        </div>
+        <div
+          class="genre-row"
+          id="genre-row"
+          aria-label="Lọc theo thể loại"
+        ></div>
+        <div class="notice" id="catalog-notice" hidden></div>
+        <div class="results-line">
+          <span id="results-count" aria-live="polite"
+            >Đang tìm những bộ phim hay…</span
+          ><button id="reset-filters" class="text-button" hidden>
+            Xóa bộ lọc ↺
+          </button>
+        </div>
+        <div class="movie-grid" id="movie-grid" aria-busy="true"></div>
+        <div class="empty-state" id="empty-state" hidden>
+          <span aria-hidden="true">⌕</span>
+          <h3>Chưa tìm thấy câu chuyện phù hợp</h3>
+          <p>Thử một tên phim khác hoặc bỏ bớt bộ lọc nhé.</p>
+          <button class="button secondary" id="empty-reset">
+            Khám phá tất cả phim
+          </button>
+        </div>
+        <div class="pagination" id="pagination" hidden>
+          <button class="button secondary" id="prev-page">← Trang trước</button
+          ><span id="page-label"></span
+          ><button class="button secondary" id="next-page">Trang tiếp →</button>
+        </div>
+      </section>
+
+      <section class="bot-banner section-wrap" id="bot-banner">
+        <div class="banner-art" aria-hidden="true">✦<i>✧</i></div>
+        <div>
+          <div class="eyebrow muted">MỘT CHÚT GỢI Ý, MỘT TỐI THẬT HAY</div>
+          <h2>Để tâm trạng chọn phim.</h2>
+          <p>“Một phim nhẹ nhàng dưới 2 tiếng?” — Cứ hỏi Ciné bot.</p>
+        </div>
+        <button class="button primary" id="banner-chat-button">
+          Trò chuyện ngay <span aria-hidden="true">↗</span>
+        </button>
+      </section>
+    </main>
+
+    <footer class="footer section-wrap">
+      <div class="footer-top">
+        <a class="brand" href="#">cinéphile<span class="brand-dot">.</span></a>
+        <p>Dành cho những câu chuyện còn ở lại<br />sau khi màn hình đã tắt.</p>
+        <span class="footer-note">Xem phim. Cảm nhận. Sẻ chia.</span>
+      </div>
+      <div class="footer-bottom">
+        <span
+          >© <span id="current-year"></span> Cinéphile · Dự án Web Design and
+          Programming</span
+        >
+        <div class="attribution">
+          <a
+            href="https://www.themoviedb.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="The Movie Database"
+            ><img
+              src="/static/assets/tmdb-logo.svg"
+              width="79"
+              height="12"
+              alt="TMDB" /></a
+          ><span
+            >This product uses the TMDB API but is not endorsed or certified by
+            TMDB.</span
+          >
+        </div>
+      </div>
+    </footer>
+
+    <button class="chat-fab" id="chat-fab" aria-label="Mở Ciné bot">
+      <span aria-hidden="true">✦</span> Ciné bot <i></i>
+    </button>
+    <aside
+      class="chat-panel"
+      id="chat-panel"
+      aria-labelledby="chat-title"
+      hidden
+    >
+      <div class="chat-header">
+        <div class="bot-avatar" aria-hidden="true">✦</div>
+        <div>
+          <h2 id="chat-title">Ciné bot</h2>
+          <p id="chat-mode">Trợ lý chọn phim của bạn</p>
+        </div>
+        <button
+          class="icon-button"
+          id="chat-reset"
+          aria-label="Bắt đầu hội thoại mới"
+        >
+          ↺</button
+        ><button class="icon-button" id="chat-close" aria-label="Đóng chatbot">
+          ×
+        </button>
+      </div>
+      <div class="chat-provider-bar">
+        <label for="chat-provider">Chọn model</label>
+        <select id="chat-provider">
+          <option value="auto">Tự động</option>
+          <option value="ollama">Qwen · Local</option>
+          <option value="gemini">Gemini · API</option>
+          <option value="rules">Bộ lọc từ khóa</option>
+        </select>
+        <button
+          id="refresh-providers"
+          class="icon-button"
+          aria-label="Kiểm tra lại kết nối model"
+        >
+          ↺
+        </button>
+        <p id="provider-status" role="status">Đang kiểm tra kết nối model…</p>
+      </div>
+      <div
+        class="chat-messages"
+        id="chat-messages"
+        role="log"
+        aria-live="polite"
+      ></div>
+      <div class="chat-suggestions" id="chat-suggestions">
+        <button>Phim hài dưới 2 tiếng</button><button>Hoạt hình Nhật Bản</button
+        ><button>Trinh thám, tránh kinh dị</button>
+      </div>
+      <form class="chat-form" id="chat-form">
+        <label class="sr-only" for="chat-input">Yêu cầu gợi ý phim</label
+        ><input
+          id="chat-input"
+          placeholder="Hôm nay bạn muốn xem gì?"
+          maxlength="1000"
+          required
+          autocomplete="off"
+        /><button type="submit" id="chat-send" aria-label="Gửi yêu cầu">
+          ↑
+        </button>
+      </form>
+      <p class="chat-disclaimer">
+        Gợi ý dựa trên danh mục phim. Không tiết lộ nội dung kết.
+      </p>
+    </aside>
+
+    <dialog class="auth-dialog" id="auth-dialog" aria-labelledby="auth-title">
+      <button
+        class="icon-button dialog-close"
+        data-close="auth-dialog"
+        aria-label="Đóng"
+      >
+        ×
+      </button>
+      <div class="eyebrow muted">CHÀO MỪNG ĐẾN CINÉPHILE</div>
+      <h2 id="auth-title">Thêm một góc nhìn.</h2>
+      <p id="auth-subtitle">Đăng nhập để lưu phim và chia sẻ cảm nhận.</p>
+      <div class="auth-tabs">
+        <button class="active" id="login-tab" type="button">Đăng nhập</button
+        ><button id="register-tab" type="button">Tạo tài khoản</button>
+      </div>
+      <form id="auth-form">
+        <label id="name-field" hidden
+          >Tên hiển thị<input
+            id="auth-name"
+            autocomplete="name"
+            minlength="2"
+            maxlength="60" /></label
+        ><label
+          >Email<input
+            id="auth-email"
+            type="email"
+            autocomplete="email"
+            required
+            maxlength="254" /></label
+        ><label
+          >Mật khẩu<input
+            id="auth-password"
+            type="password"
+            autocomplete="current-password"
+            required
+            minlength="8"
+            maxlength="128"
+            placeholder="Ít nhất 8 ký tự"
+        /></label>
+        <p class="form-error" id="auth-error" role="alert"></p>
+        <button
+          class="button primary full-width"
+          id="auth-submit"
+          type="submit"
+        >
+          Đăng nhập <span>↗</span>
+        </button>
+      </form>
+      <div id="account-info" hidden>
+        <p id="account-email"></p>
+        <button class="button secondary full-width" id="logout-button">
+          Đăng xuất
+        </button>
+      </div>
+    </dialog>
+
+    <dialog class="movie-dialog" id="movie-dialog" aria-label="Chi tiết phim">
+      <button
+        class="icon-button dialog-close"
+        data-close="movie-dialog"
+        aria-label="Đóng chi tiết phim"
+      >
+        ×
+      </button>
+      <div id="movie-detail"></div>
+    </dialog>
+    <div class="toast" id="toast" role="status" hidden></div>
+  </body>
+</html>
