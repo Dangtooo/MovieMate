@@ -15,10 +15,7 @@ class Settings(BaseSettings):
     tmdb_access_token: str = ""
     gemini_api_key: str = ""
     gemini_model: str = "gemini-3.5-flash-lite"
-    ai_provider: Literal["auto", "gemini", "ollama", "rules"] = "auto"
-    ollama_base_url: str = "http://127.0.0.1:11434"
-    ollama_model: str = "qwen3:1.7b"
-    ollama_timeout: float = Field(default=120, ge=5, le=600)
+    ai_provider: Literal["auto", "gemini"] = "gemini"
     cookie_secure: bool = False
     allowed_origins: str = "http://127.0.0.1:8000,http://localhost:8000"
 

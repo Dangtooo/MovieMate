@@ -26,12 +26,16 @@ from .auth import (
 from .config import ROOT, get_settings
 from .db import Base, engine, get_db
 from .models import Movie, Review, User, Watchlist
-from .recommendations import recommend
-from .ai import provider_status
 from .queries import has_any_genre
-from .schemas import ChatIn, ChatRequest, ChatResponse, LoginIn, RegisterIn, ReviewIn, WatchlistIn
-from .chat_sessions import conversations, owner_for
-from .chat_service import respond
+from .schemas import (
+    ChatRequest,
+    ChatResponse,
+    LoginIn,
+    RegisterIn,
+    ReviewIn,
+    WatchlistIn,
+)
+from .chat_service import conversations, owner_for, provider_status, respond
 from .tmdb import GENRES, save_movies, tmdb_get, get_movie_details
 
 logger = logging.getLogger(__name__)
@@ -508,30 +512,6 @@ def remove_watchlist(
         )
     )
     db.commit()
-
-
-@app.post("/api/chat/legacy", include_in_schema=False)
-def legacy_chat(
-    payload: ChatIn,
-    request: Request,
-    db: Session = Depends(get_db),
-    user: User | None = Depends(current_user),
-):
-    rate_limit(request, "chat", 10)
-    movies, result = recommend(db, payload, user.id if user else None)
-    similarity_reasons = result.pop("_reasons", {})
-    result["movies"] = movies_out(db, movies, user)
-    for movie in result["movies"]:
-        bits = [
-            g
-            for g in movie["genres"]
-            if g in [GENRES.get(i) for i in result["preferences"]["genre_ids"]]
-        ]
-        if movie["runtime"]:
-            bits.append(f"{movie['runtime']} phút")
-        bits.append(f"TMDB {movie['tmdb_rating']}/10")
-        movie["reason"] = similarity_reasons.get(movie["tmdb_id"]) or " · ".join(bits)
-    return result
 
 
 @app.post("/api/chat", response_model=ChatResponse)

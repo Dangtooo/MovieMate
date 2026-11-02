@@ -61,70 +61,62 @@ sudo apt install python3-venv
 
 Các lệnh trên gọi Python trong `.venv` trực tiếp, không cần kích hoạt môi trường. Khi chuyển project giữa Windows và macOS/Linux, tạo `.venv` riêng trên mỗi máy; không sao chép môi trường từ hệ điều hành khác. Website và tài liệu API dùng cùng địa chỉ ở trên, dừng bằng `Ctrl+C`.
 
-## Chọn model trong khung chat
+## Chatbot Google ADK + Gemini + TMDB
 
-Mở **MovieMate bot → Chọn model**:
+Chatbot có đúng ba file:
 
-| Lựa chọn | Cách hoạt động |
+- `backend/chat_service.py`: phiên hội thoại theo người dùng/cookie, giới hạn bộ nhớ, gọi agent và kiểm tra thẻ phim trả về.
+- `backend/chat_agent.py`: Google ADK `Agent` + `Runner`, prompt tiếng Việt, lịch sử và vòng gọi function tools. Không dùng sub-agent.
+- `backend/chat_tools.py`: tìm tên phim, discover với bộ lọc, diễn viên/đạo diễn, phim tương tự, danh sách rạp/thịnh hành, chi tiết/trailer/nơi xem và xếp hạng.
+
+Các câu hỏi thường gặp và tool được dùng:
+
+| Ví dụ người dùng hỏi | Tool |
 | --- | --- |
-| Tự động | Theo `AI_PROVIDER` trong `.env`; nếu là `auto` thì ưu tiên Gemini khi có key, nếu không thì thử Ollama |
-| Qwen · Local | Chỉ gọi Ollama theo cấu hình backend; không chuyển hội thoại sang Gemini khi lỗi |
-| Gemini · API | Gọi Gemini với API key ở backend |
-| Bộ lọc từ khóa | Không dùng AI, lọc các yêu cầu tiếng Việt cơ bản |
+| “Tìm phim tên Incantation” | `search_movies` |
+| “Phim giống Incantation?” | `find_similar_movies` (tìm phim gốc + phim liên quan trong một lần gọi tool) |
+| “Nolan là ai / 5 phim ông ấy đạo diễn?” | `person_information` |
+| “Phim có cả Tom Hanks và Meg Ryan?” | `discover_movies` với nhiều tên diễn viên |
+| “Phim hài Nhật dưới 2 giờ từ 2020?” | `discover_movies` với bộ lọc |
+| “Phim nào trên Netflix Việt Nam?” | `discover_movies` với `watch_provider`, `watch_country` |
+| “Thể loại phim nào có thể lọc?” | `list_genres` |
+| “Đang chiếu / sắp chiếu / thịnh hành?” | `movie_lists` |
+| “Nội dung, diễn viên, thời lượng, trailer?” | `movie_details` |
+| “Phim đó xem ở đâu / thuê hay mua?” | `watch_providers` |
+| “John Wick có mấy phần, thứ tự xem?” | `movie_collection` (thứ tự phát hành, không tự đoán dòng thời gian cốt truyện) |
+| “So sánh hai phim / phim nào ngắn hơn?” | `compare_movies`, `rank_candidates` |
 
-Model bị lỗi, chưa tải, hết thời gian hoặc trả JSON không hợp lệ thì dùng bộ lọc và **hiển thị rõ lý do**, không giả vờ đã chạy AI. Đổi model sẽ bắt đầu hội thoại mới. Nhấn **↺ cạnh bộ chọn model** để kiểm tra lại kết nối sau khi mở Ollama hoặc tải model.
+Phim/người trùng tên sẽ yêu cầu làm rõ. Không có dữ liệu giải thưởng, lịch suất chiếu theo rạp hay cảnh báo nội dung chi tiết thì chatbot phải nói rõ giới hạn. Kết quả cuối qua `finish_answer`, kiểm tra ID trước khi trả thẻ phim.
 
-## Qwen chạy local qua Ollama
+Terminal chạy Uvicorn mặc định in log tool (không cần bật debug):
 
-1. Cài [Ollama cho Windows](https://ollama.com/download/windows) và mở ứng dụng Ollama.
-2. Mở terminal mới, tải model:
-
-```powershell
-ollama pull qwen3:1.7b
+```text
+INFO: [chat:a1b2c3d4] TOOL START person_information args={"name": "Christopher Nolan", "role": "director"}
+INFO: [chat:a1b2c3d4] TOOL DONE person_information duration=0.83s movies=8
+INFO: [chat:a1b2c3d4] TOOL START finish_answer args={"movie_ids": [155, 27205]}
+INFO: [chat:a1b2c3d4] TOOL DONE finish_answer duration=0.00s movies=0
 ```
 
-3. Nếu Ollama chưa tự chạy nền, mở một terminal riêng:
+`chat:...` nối các dòng thuộc cùng câu hỏi. `TOOL ERROR` cho biết lỗi công cụ. Tham số phim được ghi tối đa 800 ký tự; không ghi key/token hoặc toàn bộ câu trả lời. `movies=0` của `finish_answer` là phản hồi trạng thái, ID hiển thị ở dòng START. Không dùng `--log-level warning` nếu muốn xem log tool.
 
-```powershell
-ollama serve
-```
-
-4. Chạy web theo hướng dẫn cho hệ điều hành của bạn ở trên, chọn **Qwen · Local** trong khung chat. Không cần API key cho Qwen.
-
-Cấu hình `.env`:
-
-```dotenv
-DATABASE_URL=sqlite:///./data/moviemate.db
-AI_PROVIDER=auto
-OLLAMA_BASE_URL=http://127.0.0.1:11434
-OLLAMA_MODEL=qwen3:1.7b
-OLLAMA_TIMEOUT=120
-```
-
-Muốn mặc định chọn Qwen khi mở trang: đặt `AI_PROVIDER=ollama`. Có thể thay bằng model Qwen khác đã tải, ví dụ `OLLAMA_MODEL=qwen3:4b`; tải đúng model bằng `ollama pull` trước. Máy chậm có thể tăng `OLLAMA_TIMEOUT` (giây). Tốc độ/RAM phụ thuộc model, ngữ cảnh và phần cứng; bản 1.7B là lựa chọn bắt đầu.
-
-Backend dùng Ollama `/api/chat`, JSON schema, `stream=false`, `think=false`, giới hạn đầu ra/ngữ cảnh. Qwen chỉ phân tích tiêu chí; backend chọn phim thật từ SQLite và loại phim người dùng đã xem. Model không tự tạo tên phim trả về. [Ollama Chat API](https://docs.ollama.com/api/chat), [structured outputs](https://docs.ollama.com/capabilities/structured-outputs).
-
-Lần tải model đầu tiên cần Internet và dung lượng đĩa. Sau khi tải, có thể gợi ý từ danh mục SQLite bằng Qwen mà không gọi AI cloud. Poster và kho phim TMDB vẫn cần Internet nếu sử dụng.
-
-**Giới hạn kiểm tra trên máy hiện tại:** chưa cài/chạy Ollama nên chưa kiểm tra suy luận Qwen thật. Adapter/schema/phân tuyến Qwen được kiểm tra bằng phản hồi mô phỏng; trạng thái mất kết nối và fallback được kiểm tra qua trình duyệt thật.
-
-## TMDB và Gemini
-
-Điền trong `.env`, khởi động lại web sau khi sửa:
+Điền `.env`, khởi động lại server sau khi sửa:
 
 ```dotenv
 TMDB_ACCESS_TOKEN=your_tmdb_api_read_access_token
 GEMINI_API_KEY=your_gemini_api_key
 GEMINI_MODEL=gemini-3.5-flash-lite
+AI_PROVIDER=gemini
 ```
 
-- TMDB: dùng **API Read Access Token**, không phải v3 API key. Lấy tại [cài đặt TMDB API](https://www.themoviedb.org/settings/api).
-- Gemini: lấy key tại [Google AI Studio](https://aistudio.google.com/apikey). Có thể đổi model theo quyền truy cập tài khoản.
-- Key chỉ ở backend. Không đưa `.env`, database hoặc cấu hình sao lưu lên Git.
-- Chưa có TMDB key: dùng 24 phim mẫu; thông tin/điểm/ngày phát hành là dữ liệu demo. Có key: tìm kiếm kho TMDB và lưu metadata về SQLite. Không tải video phim.
-- TMDB list cache trong RAM 5 phút; chi tiết cập nhật sau 24 giờ khi mở lại. List không gọi chi tiết cho từng thẻ; chatbot chỉ lấy một số ứng viên khi cần biết thời lượng.
-- TMDB lỗi: trả danh mục đã lưu cùng thông báo. Ảnh có placeholder nếu tải lỗi.
+Gemini model phải có sẵn trong tài khoản; có thể đổi `GEMINI_MODEL`. Key chỉ ở backend. Cài lại thư viện khi cập nhật: `python -m pip install -r requirements.lock.txt`.
+
+Ví dụ: “Phim hài Nhật dưới 2 tiếng từ 2020”, “Phim của Christopher Nolan có Cillian Murphy”, “Tìm phim giống Interstellar”, “Phim nào ngắn nhất trong số đó?”, “Trailer và nơi xem phim đó tại Việt Nam”, “Phim đang chiếu”. Các câu hỏi chung về thuật ngữ/thể loại điện ảnh có thể được giải thích trực tiếp. Dữ liệu không có trên TMDB (lịch suất chiếu, tin tức, giải thưởng...) sẽ được thông báo giới hạn.
+
+Công cụ lấy phim trực tiếp qua TMDB, lưu metadata về SQLite để mở chi tiết và thêm vào tủ phim. Gợi ý loại phim người dùng đã đánh dấu đã xem. ID/thẻ phim phải có trong dữ liệu tra cứu. Rating xếp theo điểm Bayesian đơn giản `(votes * rating + 100 * 6) / (votes + 100)` để giảm ảnh hưởng phim ít lượt chấm; thẻ vẫn hiển thị điểm TMDB gốc. Có thêm sắp xếp ngày phát hành, độ phổ biến và thời lượng. Kết quả là xếp hạng trong tập ứng viên API trả về, không phải toàn bộ kho TMDB.
+
+Thiếu key hoặc Gemini lỗi trả thông báo rõ; không tự chuyển sang bộ lọc hay Ollama. Phiên lưu RAM tối đa một giờ, 500 phiên tổng và 8 phiên mỗi chủ sở hữu; restart server sẽ mất lịch sử. Mỗi câu hỏi tối đa 8 lượt gọi model và 30 lượt tra cứu TMDB, timeout vòng ADK 120 giây (lệnh HTTP đồng bộ đang chạy kết thúc theo timeout TMDB riêng). Dùng một server worker cho bản demo.
+
+Nguồn: [Google ADK function tools](https://google.github.io/adk-docs/tools-custom/function-tools/), [TMDB discover](https://developer.themoviedb.org/reference/discover-movie), [TMDB API token](https://www.themoviedb.org/settings/api), [Gemini API key](https://aistudio.google.com/apikey).
 
 ## Dữ liệu cũ khi đổi từ PostgreSQL
 
@@ -147,7 +139,7 @@ Script sao chép bằng một transaction, không thay đổi nguồn, từ ch�
 - Mỗi người một review/phim: tạo/sửa/xóa, chấm 1–10, che spoiler, phân trang.
 - Điểm cộng đồng tính từ review thật, hiển thị riêng với điểm TMDB.
 - Tủ phim muốn xem/đã xem, bỏ lưu, lọc và phân trang.
-- Chat giữ tối đa 6 lượt ngữ cảnh, chọn Gemini/Qwen/bộ lọc, tránh phim đã xem.
+- Chat giữ tối đa 8 cặp hỏi/đáp, dùng Gemini qua Google ADK, tránh gợi ý phim đã xem.
 
 ```text
 movies: tmdb_id PK, title, original_title, overview, poster_path, backdrop_path,
@@ -166,14 +158,14 @@ SQLite bật foreign keys, WAL và busy timeout. Thời gian lưu UTC, trả API
 
 ## Mã nguồn và kiểm tra
 
-`backend/main.py`: API/phân quyền. `models.py`/`db.py`: schema/SQLite. `ai.py`: adapter Gemini/Ollama, trạng thái model. `recommendations.py`: lọc gợi ý. `tmdb.py`: TMDB và upsert SQLite. `frontend/`: HTML/CSS/JS. `scripts/setup_env.py`: cấu hình ban đầu. `/api/ai/providers`: trạng thái provider, không lộ key. Các API khác xem `/docs`.
+`backend/main.py`: API/phân quyền. `models.py`/`db.py`: schema/SQLite. `chat_service.py`/`chat_agent.py`/`chat_tools.py`: chatbot Google ADK. `tmdb.py`: TMDB và upsert SQLite. `frontend/`: HTML/CSS/JS. `scripts/setup_env.py`: cấu hình ban đầu. `/api/ai/providers`: trạng thái provider, không lộ key. Các API khác xem `/docs`.
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -q
 node --check frontend/app.js
 ```
 
-Tests dùng SQLite tạm riêng, rollback sau mỗi bài; không xóa dữ liệu app. Kiểm tra khóa ngoại/cascade, JSON genres, UTC, quyền review, watchlist, schema Qwen, history, lỗi model và việc Qwen không chuyển sang cloud.
+Tests dùng SQLite tạm riêng, rollback sau mỗi bài; không xóa dữ liệu app. Kiểm tra khóa ngoại/cascade, JSON genres, UTC, quyền review, watchlist, vòng gọi công cụ ADK, lịch sử/phiên riêng, xếp hạng, lọc TMDB và lỗi model.
 
 Kiểm tra trình duyệt tùy chọn (Node.js, web đang chạy với danh mục mẫu):
 
@@ -183,7 +175,7 @@ npm install --prefix .local/browser-tests playwright
 node scripts/browser_smoke.cjs
 ```
 
-Kiểm tra auth/review/watchlist, spoiler/escape HTML, chọn model/request Ollama/fallback, desktop/mobile, Swagger. Tài khoản QA duy nhất được xóa ở cuối; ảnh ở `.local/screenshots`. Dùng `MOVIEMATE_TEST_URL` để chọn port khác, đồng thời cấu hình `ALLOWED_ORIGINS` cho server kiểm tra.
+Kiểm tra auth/review/watchlist, spoiler/escape HTML, hiển thị thẻ chat bằng phản hồi mô phỏng, desktop/mobile, Swagger. Tài khoản QA duy nhất được xóa ở cuối; ảnh ở `.local/screenshots`. Dùng `MOVIEMATE_TEST_URL` để chọn port khác, đồng thời cấu hình `ALLOWED_ORIGINS` cho server kiểm tra.
 
 ## Phạm vi đồ án
 

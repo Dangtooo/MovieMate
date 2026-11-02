@@ -104,32 +104,23 @@ const baseURL = process.env.MOVIEMATE_TEST_URL || "http://127.0.0.1:8000";
           .querySelector("#provider-status")
           .textContent.includes("Đang kiểm tra"),
     );
-    await page.locator("#chat-provider").selectOption("rules");
-    await page.locator("#chat-input").fill("Phim hài dưới 2 tiếng");
+    // Isolate browser rendering from paid/network-dependent model inference.
+    await page.route("**/api/chat", async (route) => {
+      assert.equal(route.request().postDataJSON().provider, "gemini");
+      await route.fulfill({ status: 200, contentType: "application/json",
+        headers: { "X-Chat-Provider": "gemini" },
+        body: JSON.stringify({ reply: "Mình đã tìm phim phù hợp.", movies: [{
+          id: 372058, title: "Your Name.", release_year: "2016", rating: 8.5,
+          poster_url: null, trailer_url: null, reason: "Hoạt hình Nhật Bản"
+        }] }) });
+    });
+    await page.locator("#chat-provider").selectOption("gemini");
+    await page.locator("#chat-input").fill("Phim hoạt hình Nhật Bản");
     await page.locator("#chat-send").click();
     await page.waitForSelector(".chat-mode-note");
-    const chatTitles = await page
-      .locator(".chat-result strong")
-      .allTextContents();
-    assert(!chatTitles.some((title) => title.includes("Toy Story")));
-    assert((await page.locator(".chat-result").count()) > 0);
-    await page.locator("#chat-provider").selectOption("ollama");
-    await page.locator("#chat-input").fill("Hoạt hình dưới 2 tiếng");
-    const qwenRequest = page.waitForRequest(
-      (request) =>
-        request.url().endsWith("/api/chat") && request.method() === "POST",
-    );
-    await page.locator("#chat-send").click();
-    assert.equal((await qwenRequest).postDataJSON().provider, "ollama");
-    await page.waitForSelector(".chat-mode-note", { timeout: 150000 });
-    assert.match(
-      await page.locator(".chat-mode-note").textContent(),
-      /Qwen local/,
-    );
-    assert.equal(await page.locator("#chat-provider").inputValue(), "ollama");
-    await page.screenshot({
-      path: join(root, ".local", "screenshots", "model-selector.png"),
-    });
+    assert.match(await page.locator(".chat-result strong").textContent(), /Your Name/);
+    assert.match(await page.locator(".chat-mode-note").textContent(), /Gemini/);
+    await page.unroute("**/api/chat");
     await page.locator("#chat-close").click();
     await page.locator("#explore-nav").click();
     await page.locator("#reset-filters").click();
@@ -204,7 +195,7 @@ const baseURL = process.env.MOVIEMATE_TEST_URL || "http://127.0.0.1:8000";
         {
           result: "passed",
           checks:
-            "SQLite auth/review/watchlist, model selector, local Ollama request/fallback, spoiler/XSS, pagination, responsive layout, Swagger docs",
+            "SQLite auth/review/watchlist, model selector, ADK chat cards with mocked API, spoiler/XSS, pagination, responsive layout, Swagger docs",
           failedImages,
         },
         null,

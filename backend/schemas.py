@@ -38,48 +38,10 @@ class WatchlistIn(BaseModel):
     status: Literal["want_to_watch", "watched"] = "want_to_watch"
 
 
-class ChatTurn(BaseModel):
-    role: Literal["user", "assistant"]
-    content: str = Field(max_length=1500)
-
-
-class Preferences(BaseModel):
-    genre_ids: list[int] = Field(default_factory=list, max_length=5)
-    excluded_genre_ids: list[int] = Field(default_factory=list, max_length=5)
-    min_runtime: int | None = Field(default=None, ge=1, le=600)
-    max_runtime: int | None = Field(default=None, ge=1, le=600)
-    min_year: int | None = Field(default=None, ge=1900, le=2100)
-    max_year: int | None = Field(default=None, ge=1900, le=2100)
-    language: str | None = Field(default=None, max_length=59, pattern=r"^[a-z]{2}(?:\|[a-z]{2}){0,19}$")
-    sort_by: Literal["newest", "rating"] = "newest"
-    release_scope: Literal["released", "upcoming"] = "released"
-    reference_title: str | None = Field(default=None, min_length=1, max_length=150)
-    reference_year: int | None = Field(default=None, ge=1900, le=2100)
-    reference_movie_id: int | None = Field(default=None, gt=0)
-    intro: str = Field(
-        default="Đây là những phim phù hợp với yêu cầu của bạn.", max_length=500
-    )
-
-
-class ChatIn(BaseModel):
-    message: str = Field(min_length=1, max_length=1000)
-    history: list[ChatTurn] = Field(default_factory=list, max_length=6)
-    provider: Literal["auto", "gemini", "ollama", "rules"] = "auto"
-    context: Preferences | None = None
-    shown_movie_ids: list[int] = Field(default_factory=list, max_length=100)
-
-    @field_validator("message")
-    @classmethod
-    def clean_message(cls, value):
-        if not value.strip():
-            raise ValueError("Hãy nhập yêu cầu chọn phim.")
-        return value.strip()
-
-
 class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=1000)
     session_id: str = Field(min_length=1, max_length=128, pattern=r"^[A-Za-z0-9_-]+$")
-    provider: Literal["auto", "gemini", "ollama", "rules"] = "auto"
+    provider: Literal["auto", "gemini"] = "auto"
     selected_movie_id: int | None = Field(default=None, gt=0)
 
     @field_validator("message")
