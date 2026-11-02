@@ -4,7 +4,17 @@
 
 ## Chạy website
 
-Yêu cầu Python 3.12+. Tại thư mục dự án:
+Yêu cầu Python 3.12+ và Internet để cài thư viện lần đầu. Mở terminal tại **thư mục chứa `README.md`, `backend/` và `requirements.lock.txt`** (trong workspace hiện tại là `D:\MovieMate\MovieMate`).
+
+### Windows (PowerShell hoặc CMD)
+
+Chạy lệnh sau, hoặc nhấp đúp vào `start.bat` trong File Explorer:
+
+```powershell
+.\start.bat
+```
+
+Nếu bản tải về chưa có `start.bat`, chạy trực tiếp script PowerShell:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\run.ps1
@@ -14,7 +24,7 @@ Mở **http://127.0.0.1:8000**, tài liệu API **http://127.0.0.1:8000/docs**. 
 
 Script tạo môi trường Python nếu thiếu, cài dependencies đã khóa phiên bản, tạo `.env` với khóa phiên ngẫu nhiên nếu chưa có, tạo bảng và thêm 24 phim mẫu mà không ghi đè dữ liệu. Database là **`data/cinephile.db`**; không cần chạy một dịch vụ database riêng. Đường dẫn tương đối trong `DATABASE_URL` được tính từ thư mục dự án.
 
-Chạy thủ công:
+Chạy thủ công trên Windows nếu cần:
 
 ```powershell
 python -m venv .venv
@@ -23,6 +33,33 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m backend.demo_catalog
 .\.venv\Scripts\python.exe -m uvicorn backend.main:app --reload
 ```
+
+### macOS và Linux (Terminal: bash hoặc zsh)
+
+Kiểm tra `python3 --version` là **3.12 trở lên**. Nếu máy dùng tên lệnh như `python3.12`, thay `python3` ở lệnh tạo môi trường bằng tên đó. Lần đầu chạy lần lượt:
+
+```bash
+python3 -m venv .venv
+./.venv/bin/python -m pip install -r requirements.lock.txt
+./.venv/bin/python scripts/setup_env.py
+./.venv/bin/python -m backend.demo_catalog
+./.venv/bin/python -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000 --reload-dir backend --reload-dir frontend
+```
+
+Những lần sau chỉ cần mở terminal tại thư mục dự án và chạy:
+
+```bash
+./.venv/bin/python -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000 --reload-dir backend --reload-dir frontend
+```
+
+Nếu Ubuntu/Debian báo thiếu `venv` hoặc `ensurepip`, cài gói `venv` tương ứng với phiên bản Python đang dùng rồi tạo lại môi trường. Ví dụ với Python mặc định của hệ điều hành:
+
+```bash
+sudo apt update
+sudo apt install python3-venv
+```
+
+Các lệnh trên gọi Python trong `.venv` trực tiếp, không cần kích hoạt môi trường. Khi chuyển project giữa Windows và macOS/Linux, tạo `.venv` riêng trên mỗi máy; không sao chép môi trường từ hệ điều hành khác. Website và tài liệu API dùng cùng địa chỉ ở trên, dừng bằng `Ctrl+C`.
 
 ## Chọn model trong khung chat
 
@@ -52,7 +89,7 @@ ollama pull qwen3:1.7b
 ollama serve
 ```
 
-4. Chạy web bằng `run.ps1`, chọn **Qwen · Local** trong khung chat. Không cần API key cho Qwen.
+4. Chạy web theo hướng dẫn cho hệ điều hành của bạn ở trên, chọn **Qwen · Local** trong khung chat. Không cần API key cho Qwen.
 
 Cấu hình `.env`:
 
