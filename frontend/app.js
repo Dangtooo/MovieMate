@@ -370,7 +370,7 @@ async function openMovie(id) {
     state.detail = movie;
     const trailer = /^[\w-]{6,30}$/.test(movie.trailer_key || "")
       ? `<a class="button secondary" href="https://www.youtube.com/watch?v=${encodeURIComponent(movie.trailer_key)}" target="_blank" rel="noopener noreferrer">▷ Xem trailer</a>`
-      : "";
+      : '<span class="detail-cast">Chưa có trailer trong dữ liệu hiện tại.</span>';
     $("#movie-detail").innerHTML =
       `<div class="detail-cover">${movie.backdrop_path ? `<img src="${imageURL(movie.backdrop_path, "w1280")}" alt="Bối cảnh ${esc(movie.title)}">` : ""}</div>
       <div class="detail-body"><div class="detail-top"><img class="detail-poster" src="${imageURL(movie.poster_path)}" alt="Poster ${esc(movie.title)}" width="145" height="218"><div class="detail-info"><div class="eyebrow">MỖI BỘ PHIM, MỘT GÓC NHÌN</div><h2 id="detail-title">${esc(movie.title)}</h2><div class="detail-meta"><span>${movieYear(movie)}</span>${movie.runtime ? `<span>· ${movie.runtime} phút</span>` : ""}<span>· ${esc(movie.original_language.toUpperCase())}</span></div><div class="detail-genres">${movie.genres.map((g) => `<span>${esc(g)}</span>`).join("")}</div></div></div>

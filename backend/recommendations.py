@@ -10,11 +10,87 @@ from .config import get_settings
 from .ai import parse_preferences, resolve_provider
 from .models import Movie, Watchlist
 from .queries import has_any_genre
+<<<<<<< Updated upstream
 from .schemas import ChatIn
 from .preference_rules import normalize, rules_preferences, describe_preferences, wants_more, requested_language
 from .similarity import recommend_similar
 from .tmdb import GENRES, save_movies, tmdb_get
 from .query_policy import today
+=======
+from .schemas import ChatIn, Preferences
+from .tmdb import GENRES, save_movies, tmdb_get, get_movie_details
+
+
+def normalize(value: str):
+    return "".join(
+        c
+        for c in unicodedata.normalize("NFD", value.lower().replace("đ", "d"))
+        if unicodedata.category(c) != "Mn"
+    )
+
+
+def rules_preferences(payload: ChatIn) -> Preferences:
+    text = normalize(
+        " ".join(
+            [t.content for t in payload.history if t.role == "user"] + [payload.message]
+        )
+    )
+    genres = {
+        28: ["hanh dong", "action"],
+        35: ["hai", "vui ve", "vui nhon", "nhe nhang"],
+        27: ["kinh di", "horror"],
+        9648: ["trinh tham", "bi an", "twist"],
+        10749: ["lang man", "tinh cam"],
+        878: ["vien tuong", "sci-fi", "sci fi"],
+        16: ["hoat hinh", "anime"],
+        18: ["chinh kich", "cam dong"],
+        10751: ["gia dinh"],
+        10752: ["chien tranh"],
+    }
+    wanted, excluded = [], []
+    for genre_id, terms in genres.items():
+        for term in terms:
+            pattern = r"\b" + re.escape(term) + r"\b"
+            if re.search(pattern, text):
+                if re.search(
+                    r"(khong(?: thich| muon)?|dung|tranh|bo|khong co)\s+(?:phim\s+)?"
+                    + pattern,
+                    text,
+                ):
+                    excluded.append(genre_id)
+                else:
+                    wanted.append(genre_id)
+                break
+    minutes = list(
+        re.finditer(r"(?:duoi|toi da|khong qua|<)\s*(\d+)\s*(phut|tieng|gio)", text)
+    )
+    max_runtime = None
+    if minutes:
+        match = minutes[-1]
+        max_runtime = int(match[1]) * (1 if match[2] == "phut" else 60)
+        max_runtime = min(600, max(1, max_runtime))
+    language = None
+    for term, code in [
+        ("phim han", "ko"),
+        ("han quoc", "ko"),
+        ("phim nhat", "ja"),
+        ("nhat ban", "ja"),
+        ("phim viet", "vi"),
+        ("viet nam", "vi"),
+        ("phim phap", "fr"),
+        ("phim an do", "hi"),
+    ]:
+        if term in text:
+            language = code
+    years = re.search(r"(?:tu nam|sau nam|tu)\s*((?:19|20)\d{2})", text)
+    return Preferences(
+        genre_ids=list(dict.fromkeys(wanted))[:5],
+        excluded_genre_ids=list(dict.fromkeys(excluded))[:5],
+        max_runtime=max_runtime,
+        min_year=int(years[1]) if years else None,
+        language=language,
+    )
+>>>>>>> Stashed changes
 
 
 def get_preferences(payload: ChatIn):
@@ -126,9 +202,7 @@ def recommend(db: Session, payload: ChatIn, user_id: int | None):
                 for row in rows:
                     movie = db.get(Movie, row["id"])
                     if movie and movie.runtime is None:
-                        detail = tmdb_get(
-                            f"movie/{row['id']}", append_to_response="credits,videos"
-                        )
+                        detail = get_movie_details(row['id'])
                         save_movies(db, [detail], details=True)
         except HTTPException:
             remote_failed = True

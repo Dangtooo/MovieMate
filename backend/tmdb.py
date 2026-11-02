@@ -1,4 +1,5 @@
 from datetime import date, datetime, timezone
+import re
 from threading import Lock
 from time import monotonic
 
@@ -67,6 +68,30 @@ def tmdb_get(path: str, **params):
     return data
 
 
+def select_trailer(videos: list[dict]):
+    valid = [v for v in videos if v.get('site') == 'YouTube' and v.get('type') == 'Trailer' and re.fullmatch(r'[\w-]{6,30}', v.get('key', ''))]
+    return next((v for v in valid if v.get('official')), valid[0] if valid else None)
+
+
+def get_movie_details(tmdb_id: int):
+    # Keep Vietnamese metadata, independently fall back for missing video language.
+    data = tmdb_get(f'movie/{tmdb_id}', append_to_response='credits,videos')
+    if select_trailer(data.get('videos', {}).get('results', [])):
+        return data
+    languages = list(dict.fromkeys(['en', data.get('original_language', 'en')]))
+    for language in languages:
+        if language == 'vi' or not language:
+            continue
+        try:
+            videos = tmdb_get(f'movie/{tmdb_id}/videos', language=language)
+        except HTTPException:
+            continue
+        if select_trailer(videos.get('results', [])):
+            # Never mutate a cached response that another request may be reading.
+            return {**data, 'videos': videos}
+    return data
+
+
 def save_movies(db: Session, rows: list[dict], *, details=False):
     now = datetime.now(timezone.utc)
     for item in rows:
@@ -93,17 +118,13 @@ def save_movies(db: Session, rows: list[dict], *, details=False):
             updated_at=now,
         )
         if details:
-            trailers = [
-                v
-                for v in item.get("videos", {}).get("results", [])
-                if v.get("site") == "YouTube" and v.get("type") == "Trailer"
-            ]
+            trailer = select_trailer(item.get('videos', {}).get('results', []))
             values.update(
                 runtime=item.get("runtime") or None,
                 cast_names=[
                     a["name"] for a in item.get("credits", {}).get("cast", [])[:8]
                 ],
-                trailer_key=trailers[0]["key"] if trailers else None,
+                trailer_key=trailer['key'] if trailer else None,
                 details_fetched_at=now,
             )
         stmt = insert(Movie).values(**values)

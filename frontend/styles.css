@@ -46,8 +46,8 @@
   --muted: #9aa498;
   --accent: #d7e69a;
   --accent-dark: #18200d;
-  --serif: Georgia, "Times New Roman", serif;
-  --sans: "Segoe UI", Arial, sans-serif;
+  --sans: Arial, Helvetica, sans-serif;
+  --serif: var(--sans);
 }
 * {
   box-sizing: border-box;
@@ -314,16 +314,18 @@ h3 {
   color: var(--accent);
 }
 h1 {
+  font-family: Arial, Helvetica, sans-serif;
   font-size: clamp(44px, 5.3vw, 76px);
   line-height: 1.16;
-  letter-spacing: -2.5px;
+  letter-spacing: normal;
   margin: 24px 0 23px;
 }
-h1 em {
-  font-family: var(--serif);
+h1 .hero-highlight {
+  font-family: inherit;
+  font-style: normal;
   font-weight: 400;
   color: var(--accent);
-  letter-spacing: -1.8px;
+  letter-spacing: normal;
 }
 .hero-content > p {
   color: #b5bcb2;
@@ -858,7 +860,7 @@ textarea::placeholder {
   line-height: 1.9;
 }
 .footer-note {
-  font: italic 16px var(--serif);
+  font: 16px var(--serif);
   color: #c3cbb7;
   margin-left: auto;
 }
@@ -1625,7 +1627,7 @@ form label textarea {
   }
   h1 {
     font-size: 54px;
-    letter-spacing: -2px;
+    letter-spacing: normal;
   }
   .hero-content > p {
     font-size: 12px;

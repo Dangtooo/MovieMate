@@ -29,10 +29,15 @@ from .models import Movie, Review, User, Watchlist
 from .recommendations import recommend
 from .ai import provider_status
 from .queries import has_any_genre
+<<<<<<< Updated upstream
 from .schemas import ChatIn, ChatRequest, ChatResponse, LoginIn, RegisterIn, ReviewIn, WatchlistIn
 from .chat_sessions import conversations, owner_for
 from .chat_service import respond
 from .tmdb import GENRES, save_movies, tmdb_get
+=======
+from .schemas import ChatIn, LoginIn, RegisterIn, ReviewIn, WatchlistIn
+from .tmdb import GENRES, save_movies, tmdb_get, get_movie_details
+>>>>>>> Stashed changes
 
 logger = logging.getLogger(__name__)
 
@@ -171,7 +176,7 @@ def get_movie(db, tmdb_id):
         raise HTTPException(404, "Không tìm thấy phim.")
     movie = db.get(Movie, tmdb_id)
     if movie is None and get_settings().tmdb_access_token:
-        data = tmdb_get(f"movie/{tmdb_id}", append_to_response="credits,videos")
+        data = get_movie_details(tmdb_id)
         if data.get("adult"):
             raise HTTPException(404, "Không tìm thấy phim.")
         save_movies(db, [data], details=True)
@@ -354,7 +359,7 @@ def movie_detail(
     ) - timedelta(hours=24)
     if stale and get_settings().tmdb_access_token:
         try:
-            data = tmdb_get(f"movie/{tmdb_id}", append_to_response="credits,videos")
+            data = get_movie_details(tmdb_id)
             save_movies(db, [data], details=True)
             movie = db.get(Movie, tmdb_id)
         except HTTPException:
