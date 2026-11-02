@@ -22,7 +22,7 @@ powershell -ExecutionPolicy Bypass -File .\run.ps1
 
 Mở **http://127.0.0.1:8000**, tài liệu API **http://127.0.0.1:8000/docs**. Dừng web bằng `Ctrl+C`.
 
-Script tạo môi trường Python nếu thiếu, cài dependencies đã khóa phiên bản, tạo `.env` với khóa phiên ngẫu nhiên nếu chưa có, tạo bảng và thêm 24 phim mẫu mà không ghi đè dữ liệu. Database là **`data/cinephile.db`**; không cần chạy một dịch vụ database riêng. Đường dẫn tương đối trong `DATABASE_URL` được tính từ thư mục dự án.
+Script tạo môi trường Python nếu thiếu, cài dependencies đã khóa phiên bản, tạo `.env` với khóa phiên ngẫu nhiên nếu chưa có, tạo bảng và thêm 24 phim mẫu mà không ghi đè dữ liệu. Database là **`data/moviemate.db`**; không cần chạy một dịch vụ database riêng. Đường dẫn tương đối trong `DATABASE_URL` được tính từ thư mục dự án.
 
 Chạy thủ công trên Windows nếu cần:
 
@@ -63,7 +63,7 @@ Các lệnh trên gọi Python trong `.venv` trực tiếp, không cần kích h
 
 ## Chọn model trong khung chat
 
-Mở **Ciné bot → Chọn model**:
+Mở **MovieMate bot → Chọn model**:
 
 | Lựa chọn | Cách hoạt động |
 | --- | --- |
@@ -94,7 +94,7 @@ ollama serve
 Cấu hình `.env`:
 
 ```dotenv
-DATABASE_URL=sqlite:///./data/cinephile.db
+DATABASE_URL=sqlite:///./data/moviemate.db
 AI_PROVIDER=auto
 OLLAMA_BASE_URL=http://127.0.0.1:11434
 OLLAMA_MODEL=qwen3:1.7b
@@ -183,7 +183,7 @@ npm install --prefix .local/browser-tests playwright
 node scripts/browser_smoke.cjs
 ```
 
-Kiểm tra auth/review/watchlist, spoiler/escape HTML, chọn model/request Ollama/fallback, desktop/mobile, Swagger. Tài khoản QA duy nhất được xóa ở cuối; ảnh ở `.local/screenshots`. Dùng `CINEPHILE_TEST_URL` để chọn port khác, đồng thời cấu hình `ALLOWED_ORIGINS` cho server kiểm tra.
+Kiểm tra auth/review/watchlist, spoiler/escape HTML, chọn model/request Ollama/fallback, desktop/mobile, Swagger. Tài khoản QA duy nhất được xóa ở cuối; ảnh ở `.local/screenshots`. Dùng `MOVIEMATE_TEST_URL` để chọn port khác, đồng thời cấu hình `ALLOWED_ORIGINS` cho server kiểm tra.
 
 ## Phạm vi đồ án
 

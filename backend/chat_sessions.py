@@ -14,7 +14,7 @@ from fastapi import HTTPException
 from .config import get_settings
 from .schemas import Preferences
 
-COOKIE = "cine_chat_owner"
+COOKIE = "moviemate_chat_owner"
 TTL = 3600
 MAX_SESSIONS = 500
 MAX_PER_OWNER = 8

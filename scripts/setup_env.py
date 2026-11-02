@@ -28,7 +28,7 @@ def setup():
             backup.write_text(content, encoding="utf-8")
         content = re.sub(
             r"^DATABASE_URL\s*=.*$",
-            "DATABASE_URL=sqlite:///./data/cinephile.db",
+            "DATABASE_URL=sqlite:///./data/moviemate.db",
             content,
             flags=re.M,
         )
