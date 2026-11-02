@@ -1,4 +1,4 @@
-# Cinéphile — Review phim và chatbot recommendation
+# MovieMate — Review phim và chatbot recommendation
 
 **FastAPI + SQLite + HTML/CSS/JavaScript thuần**, dành cho môn Web Design and Programming. Không cần PostgreSQL, Docker hay build frontend. `movies.tmdb_id` vẫn là khóa chính duy nhất của phim; review và watchlist tham chiếu trực tiếp mã này.
 
