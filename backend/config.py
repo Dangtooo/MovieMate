@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=ROOT / ".env", extra="ignore")
-    database_url: str = "sqlite:///./data/cinephile.db"
+    database_url: str = "sqlite:///./data/moviemate.db"
     secret_key: str = Field(min_length=32)
     tmdb_access_token: str = ""
     gemini_api_key: str = ""

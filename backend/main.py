@@ -45,7 +45,7 @@ async def lifespan(app):
     engine.dispose()
 
 
-app = FastAPI(title="Cinéphile API", version="1.0.0", lifespan=lifespan)
+app = FastAPI(title="MovieMate API", version="1.0.0", lifespan=lifespan)
 _attempts = defaultdict(deque)
 _limit_lock = Lock()
 

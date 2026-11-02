@@ -343,7 +343,7 @@ async function markWatched(id, button) {
     });
     toast(
       status === "watched"
-        ? "Đã xem! Ciné bot sẽ tránh gợi ý lại phim này."
+        ? "Đã xem! MovieMate bot sẽ tránh gợi ý lại phim này."
         : "Đã chuyển sang danh sách muốn xem.",
     );
     loadMovies();
@@ -377,7 +377,7 @@ async function openMovie(id) {
       <div class="detail-actions"><button class="button primary" id="detail-save">${movie.watchlist_status ? "✓ Đã lưu · Bỏ lưu" : "+ Thêm vào tủ phim"}</button><button class="button secondary" id="detail-watched">${movie.watchlist_status === "watched" ? "✓ Đã xem · Đánh dấu chưa xem" : "◎ Đánh dấu đã xem"}</button>${trailer}</div>
       ${movie.warning ? `<div class="notice">${esc(movie.warning)}</div>` : ""}
       <p class="detail-overview">${esc(movie.overview || "Chưa có tóm tắt cho bộ phim này.")}</p>${movie.cast_names?.length ? `<p class="detail-cast"><strong>Diễn viên</strong> &nbsp; ${movie.cast_names.map(esc).join(" · ")}</p>` : ""}
-      <div class="rating-summary"><div><strong><span class="star">★</span> ${Number(movie.tmdb_rating).toFixed(1)}<span> / 10</span></strong><small>${state.health?.tmdb_configured ? "Điểm TMDB" : "Điểm TMDB · dữ liệu mẫu"}</small></div><div><strong>${movie.community_rating ?? "—"}<span> / 10</span></strong><small>Cộng đồng Cinéphile · ${movie.review_count} review</small></div></div>
+      <div class="rating-summary"><div><strong><span class="star">★</span> ${Number(movie.tmdb_rating).toFixed(1)}<span> / 10</span></strong><small>${state.health?.tmdb_configured ? "Điểm TMDB" : "Điểm TMDB · dữ liệu mẫu"}</small></div><div><strong>${movie.community_rating ?? "—"}<span> / 10</span></strong><small>Cộng đồng MovieMate · ${movie.review_count} review</small></div></div>
       <div class="reviews-heading"><h3>Góc nhìn của bạn.</h3><span>${reviews.total} review</span></div>
       ${state.user ? reviewFormHTML(ownReview) : '<p class="review-login"><button id="review-login-button">Đăng nhập</button> để viết review đầu tiên của bạn về bộ phim này.</p>'}
       <div id="reviews-list">${reviews.items.length ? reviews.items.map(reviewHTML).join("") : '<p class="review-empty">Chưa có review. Hãy là người chia sẻ cảm nhận đầu tiên.</p>'}</div>
@@ -498,7 +498,7 @@ function resetChat() {
   $("#chat-send").disabled = false;
   $("#chat-suggestions").hidden = false;
   appendMessage(
-    "Chào bạn, mình là Ciné bot ✦\nBạn muốn xem gì? Mình có thể tìm theo nội dung, diễn viên/đạo diễn, phim tương tự hoặc phim đang/sắp chiếu. Bạn cũng có thể hỏi trailer và nơi xem của một phim.",
+    "Chào bạn, mình là MovieMate bot ✦\nBạn muốn xem gì? Mình có thể tìm theo nội dung, diễn viên/đạo diễn, phim tương tự hoặc phim đang/sắp chiếu. Bạn cũng có thể hỏi trailer và nơi xem của một phim.",
   );
   updateProviderLabel();
 }

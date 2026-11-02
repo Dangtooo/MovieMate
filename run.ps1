@@ -10,6 +10,6 @@ if (-not (Test-Path -LiteralPath '.venv/Scripts/python.exe')) {
 if ($LASTEXITCODE -ne 0) { throw 'Environment setup failed.' }
 & './.venv/Scripts/python.exe' -m backend.demo_catalog
 if ($LASTEXITCODE -ne 0) { throw 'Database initialization failed.' }
-Write-Host 'Cinephile: http://127.0.0.1:8000 | API docs: http://127.0.0.1:8000/docs'
+Write-Host 'MovieMate: http://127.0.0.1:8000 | API docs: http://127.0.0.1:8000/docs'
 & './.venv/Scripts/python.exe' -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000 --reload-dir backend --reload-dir frontend
 

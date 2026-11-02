@@ -4,7 +4,7 @@ const { mkdirSync } = require("node:fs");
 const { join } = require("node:path");
 const { execFileSync } = require("node:child_process");
 const assert = require("node:assert/strict");
-const baseURL = process.env.CINEPHILE_TEST_URL || "http://127.0.0.1:8000";
+const baseURL = process.env.MOVIEMATE_TEST_URL || "http://127.0.0.1:8000";
 
 (async () => {
   const root = join(__dirname, "..");
@@ -39,19 +39,19 @@ const baseURL = process.env.CINEPHILE_TEST_URL || "http://127.0.0.1:8000";
     });
     await page.locator("#account-button").click();
     await page.locator("#register-tab").click();
-    await page.locator("#auth-name").fill("Ciné Tester");
+    await page.locator("#auth-name").fill("MovieMate Tester");
     await page.locator("#auth-email").fill(email);
     await page.locator("#auth-password").fill("Browser-test-password-2026");
     await page.locator("#auth-submit").click();
     await page.waitForFunction(
       () =>
-        document.querySelector("#account-label").textContent === "Ciné Tester",
+        document.querySelector("#account-label").textContent === "MovieMate Tester",
     );
     await page.reload();
     await page.waitForSelector(".movie-card");
     assert.equal(
       await page.locator("#account-label").textContent(),
-      "Ciné Tester",
+      "MovieMate Tester",
     );
     await page.locator("#search-input").fill("Toy Story");
     await page.waitForFunction(

@@ -11,7 +11,7 @@ from .models import User
 
 password_hash = PasswordHash.recommended()
 DUMMY_HASH = password_hash.hash("unused-dummy-password")
-COOKIE_NAME = "cine_session"
+COOKIE_NAME = "moviemate_session"
 
 
 def current_user(request: Request, db: Session = Depends(get_db)) -> User | None:

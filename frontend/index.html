@@ -5,24 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Khám phá phim, chia sẻ góc nhìn và tìm bộ phim hợp với tâm trạng cùng Cinéphile."
+      content="Khám phá phim, chia sẻ góc nhìn và tìm bộ phim hợp với tâm trạng cùng MovieMate."
     />
     <meta name="theme-color" content="#101412" />
-    <title>Cinéphile — Một bộ phim, một thế giới</title>
+    <title>MovieMate — Một bộ phim, một thế giới</title>
     <link
       rel="icon"
       href="/static/assets/poster-placeholder.svg"
       type="image/svg+xml"
     />
-    <link rel="stylesheet" href="/static/styles.css?v=arial-vietnamese-2" />
-    <script src="/static/app.js" defer></script>
+    <link rel="preload" href="/static/assets/fonts/NotoSans-Variable.ttf" as="font" type="font/ttf" crossorigin />
+    <link rel="stylesheet" href="/static/styles.css?v=moviemate-noto-1" />
+    <script src="/static/app.js?v=moviemate-1" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#catalog">Đến danh sách phim</a>
     <header class="header">
-      <a href="#" class="brand" aria-label="Cinéphile trang chủ"
-        ><span class="brand-mark" aria-hidden="true">c<span>•</span></span
-        >cinéphile<span class="brand-dot">.</span></a
+      <a href="#" class="brand" aria-label="MovieMate trang chủ"
+        ><span class="brand-mark" aria-hidden="true">m<span>•</span></span
+        >MovieMate<span class="brand-dot">.</span></a
       >
       <nav aria-label="Điều hướng chính">
         <button class="nav-link active" id="explore-nav">Khám phá</button>
@@ -30,7 +31,7 @@
           Tủ phim <span class="tiny-dot"></span>
         </button>
         <button class="nav-link" id="chat-nav">
-          Ciné bot <span class="new-tag">AI</span>
+          MovieMate bot <span class="new-tag">AI</span>
         </button>
       </nav>
       <button class="account-button" id="account-button">
@@ -64,12 +65,12 @@
             <button class="button primary" id="discover-button">
               Tìm phim tiếp theo <span aria-hidden="true">↗</span></button
             ><button class="button ghost" id="hero-chat-button">
-              <span class="sparkle" aria-hidden="true">✦</span> Hỏi Ciné bot
+              <span class="sparkle" aria-hidden="true">✦</span> Hỏi MovieMate bot
             </button>
           </div>
           <div class="hero-footnote">
             <span class="overlap-circles" aria-hidden="true"
-              ><i>◉</i><i>✦</i><i>c.</i></span
+              ><i>◉</i><i>✦</i><i>m.</i></span
             ><span>Điện ảnh hay hơn khi được sẻ chia.</span>
           </div>
         </div>
@@ -84,7 +85,7 @@
           >
         </button>
         <span class="hero-index" aria-hidden="true"
-          >01 <span>/ CINÉ SELECTION</span></span
+          >01 <span>/ MOVIEMATE SELECTION</span></span
         >
       </section>
 
@@ -163,7 +164,7 @@
         <div>
           <div class="eyebrow muted">MỘT CHÚT GỢI Ý, MỘT TỐI THẬT HAY</div>
           <h2>Để tâm trạng chọn phim.</h2>
-          <p>“Một phim nhẹ nhàng dưới 2 tiếng?” — Cứ hỏi Ciné bot.</p>
+          <p>“Một phim nhẹ nhàng dưới 2 tiếng?” — Cứ hỏi MovieMate bot.</p>
         </div>
         <button class="button primary" id="banner-chat-button">
           Trò chuyện ngay <span aria-hidden="true">↗</span>
@@ -173,13 +174,13 @@
 
     <footer class="footer section-wrap">
       <div class="footer-top">
-        <a class="brand" href="#">cinéphile<span class="brand-dot">.</span></a>
+        <a class="brand" href="#">MovieMate<span class="brand-dot">.</span></a>
         <p>Dành cho những câu chuyện còn ở lại<br />sau khi màn hình đã tắt.</p>
         <span class="footer-note">Xem phim. Cảm nhận. Sẻ chia.</span>
       </div>
       <div class="footer-bottom">
         <span
-          >© <span id="current-year"></span> Cinéphile · Dự án Web Design and
+          >© <span id="current-year"></span> MovieMate · Dự án Web Design and
           Programming</span
         >
         <div class="attribution">
@@ -201,8 +202,8 @@
       </div>
     </footer>
 
-    <button class="chat-fab" id="chat-fab" aria-label="Mở Ciné bot">
-      <span aria-hidden="true">✦</span> Ciné bot <i></i>
+    <button class="chat-fab" id="chat-fab" aria-label="Mở MovieMate bot">
+      <span aria-hidden="true">✦</span> MovieMate bot <i></i>
     </button>
     <aside
       class="chat-panel"
@@ -213,7 +214,7 @@
       <div class="chat-header">
         <div class="bot-avatar" aria-hidden="true">✦</div>
         <div>
-          <h2 id="chat-title">Ciné bot</h2>
+          <h2 id="chat-title">MovieMate bot</h2>
           <p id="chat-mode">Trợ lý chọn phim của bạn</p>
         </div>
         <button
@@ -278,7 +279,7 @@
       >
         ×
       </button>
-      <div class="eyebrow muted">CHÀO MỪNG ĐẾN CINÉPHILE</div>
+      <div class="eyebrow muted">CHÀO MỪNG ĐẾN MOVIEMATE</div>
       <h2 id="auth-title">Thêm một góc nhìn.</h2>
       <p id="auth-subtitle">Đăng nhập để lưu phim và chia sẻ cảm nhận.</p>
       <div class="auth-tabs">
