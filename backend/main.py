@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from threading import Lock
 from time import monotonic
+from urllib.parse import quote
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
@@ -28,7 +29,9 @@ from .models import Movie, Review, User, Watchlist
 from .recommendations import recommend
 from .ai import provider_status
 from .queries import has_any_genre
-from .schemas import ChatIn, LoginIn, RegisterIn, ReviewIn, WatchlistIn
+from .schemas import ChatIn, ChatRequest, ChatResponse, LoginIn, RegisterIn, ReviewIn, WatchlistIn
+from .chat_sessions import conversations, owner_for
+from .chat_service import respond
 from .tmdb import GENRES, save_movies, tmdb_get
 
 logger = logging.getLogger(__name__)
@@ -507,8 +510,8 @@ def remove_watchlist(
     db.commit()
 
 
-@app.post("/api/chat")
-def chat(
+@app.post("/api/chat/legacy", include_in_schema=False)
+def legacy_chat(
     payload: ChatIn,
     request: Request,
     db: Session = Depends(get_db),
@@ -516,6 +519,7 @@ def chat(
 ):
     rate_limit(request, "chat", 10)
     movies, result = recommend(db, payload, user.id if user else None)
+    similarity_reasons = result.pop("_reasons", {})
     result["movies"] = movies_out(db, movies, user)
     for movie in result["movies"]:
         bits = [
@@ -526,7 +530,26 @@ def chat(
         if movie["runtime"]:
             bits.append(f"{movie['runtime']} phút")
         bits.append(f"TMDB {movie['tmdb_rating']}/10")
-        movie["reason"] = " · ".join(bits)
+        movie["reason"] = similarity_reasons.get(movie["tmdb_id"]) or " · ".join(bits)
+    return result
+
+
+@app.post("/api/chat", response_model=ChatResponse)
+def chat(
+    payload: ChatRequest,
+    request: Request,
+    response: Response,
+    db: Session = Depends(get_db),
+    user: User | None = Depends(current_user),
+):
+    rate_limit(request, "chat", 10)
+    owner = owner_for(request, response, user)
+    with conversations.acquire(owner, payload.session_id) as state:
+        result, metadata = respond(db, state, payload, user.id if user else None)
+    response.headers["X-Chat-Provider"] = metadata["mode"]
+    response.headers["X-Chat-Action"] = metadata["action"]
+    if metadata["notice"]:
+        response.headers["X-Chat-Notice"] = quote(metadata["notice"])
     return result
 
 

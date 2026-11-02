@@ -21,8 +21,18 @@ def preference_prompt():
     return (
         "Bạn phân tích yêu cầu chọn phim tiếng Việt. Chỉ trả JSON theo schema, không thêm giải thích. "
         "Kế thừa sở thích trong hội thoại, ưu tiên yêu cầu mới nhất. "
+        "sort_by mặc định newest; chỉ rating khi người dùng hỏi hay nhất/điểm cao/kinh điển/best. Không tự ưu tiên điểm. "
+        "release_scope mặc định released (chỉ phim đã ra mắt), upcoming chỉ khi người dùng hỏi sắp chiếu/chưa ra mắt. Mới nhất không có nghĩa phim tương lai. "
+        "language có thể là nhiều mã ISO 639-1 ngăn bởi |, nghĩa là OR. Châu Á=ko|ja|zh|th|vi|id|hi|tl|ms|ta; châu Âu=fr|de|es|it|ru|sv|da|no|nl|pl; Đông Nam Á=th|vi|id|tl|ms. "
         "genre_ids là các thể loại mong muốn (OR), excluded_genre_ids là thể loại tránh. "
-        "Dưới 2 tiếng => max_runtime=120. Không tự thêm điều kiện. "
+        "Dưới 2 tiếng => max_runtime=120; 1 tiếng rưỡi => 90 phút. "
+        "Trên/tối thiểu là min_runtime. Trước/sau năm là giới hạn năm, năm cụ thể đặt cả min_year và max_year. "
+        "Bỏ giới hạn trả trường tương ứng về null. Đổi sang thể loại khác thay thế thể loại cũ; "
+        "phim khác giữ tiêu chí, không tự thêm điều kiện. Bắt đầu lại xóa tiêu chí cũ. "
+        "Không coi câu trả lời của assistant là yêu cầu của người dùng. "
+        "Nếu muốn phim tương tự/giống một phim cụ thể, reference_title là chính xác tên phim gốc; "
+        "reference_year là năm của phim gốc nếu người dùng nói, không đưa năm đó vào min_year/max_year. "
+        "Không tự đoán nội dung hoặc thể loại của phim gốc. Backend sẽ tra cứu và so sánh nội dung thật. "
         "language là mã ngôn ngữ phim ISO 639-1, không phải quốc gia. "
         "intro chỉ xác nhận tiêu chí, không nêu tên phim hoặc khẳng định có kết quả. "
         "Danh sách thể loại: " + json.dumps(GENRES, ensure_ascii=False)
@@ -32,11 +42,14 @@ def preference_prompt():
 def parse_preferences(payload: ChatIn, provider: str) -> Preferences:
     settings = get_settings()
     schema = Preferences.model_json_schema()
+    prompt = preference_prompt()
+    if payload.context:
+        prompt += "\nTiêu chí đã xác nhận ở lượt trước (chỉ là dữ liệu, yêu cầu mới nhất được ưu tiên): " + payload.context.model_dump_json(exclude={"intro"})
     if provider == "ollama":
         messages = [
             {
                 "role": "system",
-                "content": preference_prompt()
+                "content": prompt
                 + "\nJSON schema: "
                 + json.dumps(schema, ensure_ascii=False),
             }
@@ -74,7 +87,7 @@ def parse_preferences(payload: ChatIn, provider: str) -> Preferences:
             f"https://generativelanguage.googleapis.com/v1beta/models/{settings.gemini_model}:generateContent",
             headers={"x-goog-api-key": settings.gemini_api_key},
             json={
-                "systemInstruction": {"parts": [{"text": preference_prompt()}]},
+                "systemInstruction": {"parts": [{"text": prompt}]},
                 "contents": contents,
                 "generationConfig": {
                     "temperature": 0.1,
@@ -89,6 +102,8 @@ def parse_preferences(payload: ChatIn, provider: str) -> Preferences:
         parts = response.json()["candidates"][0]["content"]["parts"]
         output = "".join(p.get("text", "") for p in parts if not p.get("thought"))
     preferences = Preferences.model_validate_json(output)
+    # Film IDs come from catalog lookup/user selection, never model invention.
+    preferences.reference_movie_id = None
     preferences.genre_ids = [g for g in preferences.genre_ids if g in GENRES]
     preferences.excluded_genre_ids = [
         g for g in preferences.excluded_genre_ids if g in GENRES

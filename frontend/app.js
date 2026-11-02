@@ -33,7 +33,7 @@ const state = {
   detailVersion: 0,
   loadVersion: 0,
   authMode: "login",
-  chatHistory: [],
+  chatSessionId: null,
   providers: [],
   provider: "auto",
   providerTouched: false,
@@ -57,6 +57,11 @@ async function api(path, options = {}) {
         ? data.detail
         : "Không thể xử lý yêu cầu. Vui lòng thử lại.",
     );
+  }
+  if (path === "/chat") {
+    data.chatProvider = response.headers.get("X-Chat-Provider") || "rules";
+    data.chatAction = response.headers.get("X-Chat-Action") || "recommendations";
+    data.chatNotice = decodeURIComponent(response.headers.get("X-Chat-Notice") || "");
   }
   return data;
 }
@@ -486,14 +491,14 @@ function appendMessage(text, role = "bot") {
 
 function resetChat() {
   ++state.chatVersion;
-  state.chatHistory = [];
+  state.chatSessionId = crypto.randomUUID();
   state.chatPending = false;
   $("#chat-messages").replaceChildren();
   $("#chat-input").value = "";
   $("#chat-send").disabled = false;
   $("#chat-suggestions").hidden = false;
   appendMessage(
-    "Chào bạn, mình là Ciné bot ✦\nBạn đang muốn xem một bộ phim như thế nào? Kể mình nghe thể loại, tâm trạng hoặc khoảng thời gian bạn có nhé.",
+    "Chào bạn, mình là Ciné bot ✦\nBạn muốn xem gì? Mình có thể tìm theo nội dung, diễn viên/đạo diễn, phim tương tự hoặc phim đang/sắp chiếu. Bạn cũng có thể hỏi trailer và nơi xem của một phim.",
   );
   updateProviderLabel();
 }
@@ -529,7 +534,7 @@ async function refreshProviders(initial = false) {
   }
 }
 
-async function sendChat(event) {
+async function sendChat(event, selectedMovieId = null) {
   event?.preventDefault();
   const message = $("#chat-input").value.trim();
   if (!message || state.chatPending) return;
@@ -546,45 +551,62 @@ async function sendChat(event) {
       method: "POST",
       body: JSON.stringify({
         message,
-        history: state.chatHistory.slice(-6),
+        session_id: state.chatSessionId,
         provider: state.provider,
+        selected_movie_id: selectedMovieId,
       }),
     });
     if (version !== state.chatVersion) return;
     thinking.remove();
     const node = appendMessage(result.reply);
     result.movies.forEach((movie) => {
+      const card = document.createElement("div");
+      card.className = "chat-movie-card";
       const button = document.createElement("button");
       button.className = "chat-result";
-      button.innerHTML = `<img src="${imageURL(movie.poster_path, "w185")}" alt="" width="38" height="56"><span><strong>${esc(movie.title)} <span>↗</span></strong><small>${movieYear(movie)} · ${esc(movie.reason)}</small></span>`;
-      button.addEventListener("click", () => openMovie(movie.tmdb_id));
-      node.append(button);
+      const poster = /^https:\/\/image\.tmdb\.org\/t\/p\/w200\/[\w.-]+\.(jpg|png|webp)$/i.test(movie.poster_url || "")
+        ? movie.poster_url : placeholder;
+      button.innerHTML = `<img src="${poster}" alt="" width="44" height="66"><span><strong>${esc(movie.title)} <span>↗</span></strong><span class="chat-movie-meta">${esc(movie.release_year || "Chưa rõ năm")} <span class="chat-rating" aria-label="Điểm TMDB">★ ${Number(movie.rating).toFixed(1)}</span></span><small>${esc(movie.reason)}</small></span>`;
+      button.addEventListener("click", () => openMovie(movie.id));
+      card.append(button);
+      if (result.chatAction === "choose-reference") {
+        const choose = document.createElement("button");
+        choose.className = "chat-choose-reference";
+        choose.textContent = "Chọn phim này";
+        choose.addEventListener("click", () => {
+          if (state.chatPending || version !== state.chatVersion) return;
+          $("#chat-input").value = `Chọn ${movie.title} (${movie.release_year || "chưa rõ năm"})`;
+          sendChat(null, movie.id);
+        });
+        card.append(choose);
+      }
+      if (/^https:\/\/www\.youtube\.com\/watch\?v=[A-Za-z0-9_-]{11}$/.test(movie.trailer_url || "")) {
+        const trailer = document.createElement("a");
+        trailer.className = "chat-trailer-link";
+        trailer.href = movie.trailer_url;
+        trailer.target = "_blank";
+        trailer.rel = "noopener noreferrer";
+        trailer.textContent = "▶ Xem trailer chính thức";
+        card.append(trailer);
+      }
+      node.append(card);
     });
     const note = document.createElement("small");
     note.className = "chat-mode-note";
     note.textContent =
-      result.mode === "ollama"
-        ? `✦ Qwen local · ${result.model} · Xử lý trên máy qua Ollama`
-        : result.mode === "gemini"
-          ? `✦ Gemini · ${result.model} · Phim được kiểm tra từ database`
-          : result.provider_notice ||
-            "Đang dùng bộ lọc từ khóa · Không dùng AI";
-    if (result.catalog_source === "cached")
-      note.textContent += " · TMDB lỗi, dùng danh mục đã lưu";
+      result.chatProvider === "ollama"
+        ? "✦ Qwen local · Gọi công cụ tra cứu TMDB"
+        : result.chatProvider === "gemini"
+          ? "✦ Gemini · Gọi công cụ tra cứu TMDB"
+          : result.chatNotice || "Tra cứu TMDB bằng bộ lọc · Không dùng AI";
     node.append(note);
     applyImageFallbacks(node);
     $("#chat-mode").textContent =
-      result.mode === "ollama"
-        ? "Qwen local · " + result.model
-        : result.mode === "gemini"
+      result.chatProvider === "ollama"
+        ? "Qwen local · Gợi ý từ công cụ TMDB"
+        : result.chatProvider === "gemini"
           ? "Gemini · Gợi ý từ danh mục phim"
           : "Bộ lọc gợi ý theo từ khóa";
-    // Keep only concise conversation text, never send movie cards or all catalog data.
-    state.chatHistory.push(
-      { role: "user", content: message },
-      { role: "assistant", content: result.reply },
-    );
-    state.chatHistory = state.chatHistory.slice(-6);
   } catch (error) {
     if (version !== state.chatVersion) return;
     thinking.remove();
