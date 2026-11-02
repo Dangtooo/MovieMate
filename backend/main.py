@@ -29,15 +29,10 @@ from .models import Movie, Review, User, Watchlist
 from .recommendations import recommend
 from .ai import provider_status
 from .queries import has_any_genre
-<<<<<<< Updated upstream
 from .schemas import ChatIn, ChatRequest, ChatResponse, LoginIn, RegisterIn, ReviewIn, WatchlistIn
 from .chat_sessions import conversations, owner_for
 from .chat_service import respond
-from .tmdb import GENRES, save_movies, tmdb_get
-=======
-from .schemas import ChatIn, LoginIn, RegisterIn, ReviewIn, WatchlistIn
 from .tmdb import GENRES, save_movies, tmdb_get, get_movie_details
->>>>>>> Stashed changes
 
 logger = logging.getLogger(__name__)
 
