@@ -79,7 +79,7 @@ def db(test_engine):
 def client(db, monkeypatch):
     monkeypatch.setattr(get_settings(), "tmdb_access_token", "")
     monkeypatch.setattr(get_settings(), "gemini_api_key", "")
-    monkeypatch.setattr(get_settings(), "ai_provider", "rules")
+    monkeypatch.setattr(get_settings(), "ai_provider", "gemini")
     _attempts.clear()
     app.dependency_overrides[get_db] = lambda: db
     with TestClient(app) as client:

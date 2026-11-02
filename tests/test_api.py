@@ -1,7 +1,5 @@
 from datetime import datetime, timezone
-from types import SimpleNamespace
 
-import httpx
 from fastapi import HTTPException
 from sqlalchemy import func, select
 
@@ -143,49 +141,15 @@ def test_review_and_account_validation(client, account):
     )
 
 
-def test_watchlist_upsert_and_watched_exclusion(client, db, account):
+def test_watchlist_upsert_and_delete(client, db, account):
     path = "/api/watchlist/862"
     client.put(path, json={"status": "want_to_watch"})
     client.put(path, json={"status": "watched"})
     assert db.scalar(select(func.count()).select_from(Watchlist)) == 1
     assert client.get("/api/watchlist?status=watched").json()["total"] == 1
     assert client.get("/api/watchlist?status=want_to_watch").json()["total"] == 0
-    result = client.post(
-        "/api/chat", json={"message": "Phim hoạt hình dưới 2 tiếng"}
-    ).json()
-    assert result["mode"] == "rules"
-    assert 862 not in [m["tmdb_id"] for m in result["movies"]]
-    assert [m["tmdb_id"] for m in result["movies"]] == [372058]
     client.delete(path)
     assert client.get("/api/watchlist").json()["total"] == 0
-
-
-def test_chat_constraints_and_no_fabrication(client):
-    result = client.post(
-        "/api/chat", json={"message": "Phim hài dưới 2 tiếng, tránh kinh dị"}
-    ).json()
-    assert result["preferences"]["max_runtime"] == 120
-    assert 27 in result["preferences"]["excluded_genre_ids"]
-    assert [m["tmdb_id"] for m in result["movies"]] == [862]
-    assert all(m["runtime"] <= 120 for m in result["movies"])
-    empty = client.post("/api/chat", json={"message": "Phim Hàn dưới 2 tiếng"}).json()
-    assert empty["movies"] == []
-    assert client.post("/api/chat", json={"message": " " * 10}).status_code == 422
-
-
-def test_chat_history_constraints(client):
-    result = client.post(
-        "/api/chat",
-        json={
-            "message": "Dưới 2 tiếng nhé",
-            "history": [
-                {"role": "user", "content": "Hoạt hình Nhật Bản"},
-                {"role": "assistant", "content": "Bạn muốn thời lượng bao lâu?"},
-            ],
-        },
-    ).json()
-    assert result["preferences"]["language"] == "ja"
-    assert [m["tmdb_id"] for m in result["movies"]] == [372058]
 
 
 def test_tmdb_list_upsert_preserves_detail(db):
@@ -247,45 +211,6 @@ def test_external_listing_and_cache_fallback(client, monkeypatch):
     assert fallback["total"] == 4
 
 
-def test_gemini_intent_and_failure_fallback(client, monkeypatch):
-    monkeypatch.setattr(get_settings(), "gemini_api_key", "test-key")
-
-    def remote(*args, **kwargs):
-        return SimpleNamespace(
-            raise_for_status=lambda: None,
-            json=lambda: {
-                "candidates": [
-                    {
-                        "content": {
-                            "parts": [
-                                {
-                                    "text": '{"genre_ids":[16],"max_runtime":120,"intro":"Tìm hoạt hình dưới hai giờ nhé."}'
-                                }
-                            ]
-                        }
-                    }
-                ]
-            },
-        )
-
-    monkeypatch.setattr("backend.ai.httpx.post", remote)
-    result = client.post(
-        "/api/chat", json={"message": "Hoạt hình dưới 2 tiếng", "provider": "gemini"}
-    ).json()
-    assert result["mode"] == "gemini" and len(result["movies"]) == 2
-
-    def failed(*args, **kwargs):
-        raise httpx.ConnectError("Provider unavailable")
-
-    monkeypatch.setattr("backend.ai.httpx.post", failed)
-    assert (
-        client.post(
-            "/api/chat", json={"message": "Hoạt hình", "provider": "gemini"}
-        ).json()["mode"]
-        == "rules_fallback"
-    )
-
-
 def test_cross_origin_cookie_protection(client, account):
     assert (
         client.post(
@@ -308,9 +233,24 @@ def test_cross_origin_cookie_protection(client, account):
     )
 
 
-def test_chat_rate_limit(client):
+def test_chat_rate_limit(client, monkeypatch):
+    monkeypatch.setattr(
+        "backend.main.respond",
+        lambda *args: (
+            {"reply": "Xin chào", "movies": []},
+            {"mode": "gemini", "action": "recommendations", "notice": None},
+        ),
+    )
     for _ in range(10):
         assert (
-            client.post("/api/chat", json={"message": "Gợi ý phim"}).status_code == 200
+            client.post(
+                "/api/chat", json={"message": "Gợi ý phim", "session_id": "rate-test"}
+            ).status_code
+            == 200
         )
-    assert client.post("/api/chat", json={"message": "Gợi ý phim"}).status_code == 429
+    assert (
+        client.post(
+            "/api/chat", json={"message": "Gợi ý phim", "session_id": "rate-test"}
+        ).status_code
+        == 429
+    )

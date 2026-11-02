@@ -59,7 +59,7 @@ async function api(path, options = {}) {
     );
   }
   if (path === "/chat") {
-    data.chatProvider = response.headers.get("X-Chat-Provider") || "rules";
+    data.chatProvider = response.headers.get("X-Chat-Provider") || "gemini";
     data.chatAction = response.headers.get("X-Chat-Action") || "recommendations";
     data.chatNotice = decodeURIComponent(response.headers.get("X-Chat-Notice") || "");
   }
@@ -504,17 +504,11 @@ function resetChat() {
 }
 
 function updateProviderLabel() {
-  const selected = state.providers.find((p) => p.id === state.provider);
-  $("#chat-mode").textContent =
-    state.provider === "auto"
-      ? "Tự động chọn model theo cấu hình"
-      : state.provider === "rules"
-        ? "Bộ lọc từ khóa · Không dùng AI"
-        : `${state.provider === "ollama" ? "Qwen local" : "Gemini"} · ${selected?.model || "Đang kiểm tra"}`;
-  $("#provider-status").textContent =
-    state.provider === "auto"
-      ? "Ưu tiên theo AI_PROVIDER trong .env; nếu AI lỗi sẽ dùng bộ lọc."
-      : selected?.message || "Chưa kiểm tra được kết nối. Nhấn ↺ để thử lại.";
+  const selected = state.providers.find((p) => p.id === "gemini");
+  $("#chat-mode").textContent = "MovieMate · Gemini";
+  $("#provider-status").textContent = selected?.ready
+    ? "Sẵn sàng trò chuyện và tra cứu phim."
+    : "Chatbot chưa sẵn sàng. Vui lòng thử lại sau.";
 }
 
 async function refreshProviders(initial = false) {
@@ -593,20 +587,10 @@ async function sendChat(event, selectedMovieId = null) {
     });
     const note = document.createElement("small");
     note.className = "chat-mode-note";
-    note.textContent =
-      result.chatProvider === "ollama"
-        ? "✦ Qwen local · Gọi công cụ tra cứu TMDB"
-        : result.chatProvider === "gemini"
-          ? "✦ Gemini · Gọi công cụ tra cứu TMDB"
-          : result.chatNotice || "Tra cứu TMDB bằng bộ lọc · Không dùng AI";
+    note.textContent = "✦ Gemini · Dữ liệu phim từ TMDB";
     node.append(note);
     applyImageFallbacks(node);
-    $("#chat-mode").textContent =
-      result.chatProvider === "ollama"
-        ? "Qwen local · Gợi ý từ công cụ TMDB"
-        : result.chatProvider === "gemini"
-          ? "Gemini · Gợi ý từ danh mục phim"
-          : "Bộ lọc gợi ý theo từ khóa";
+    $("#chat-mode").textContent = "MovieMate · Gemini";
   } catch (error) {
     if (version !== state.chatVersion) return;
     thinking.remove();
