@@ -10,4 +10,8 @@ data/
 *.db
 *.db-shm
 *.db-wal
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
 
