@@ -167,6 +167,17 @@ node --check frontend/app.js
 
 Tests dùng SQLite tạm riêng, rollback sau mỗi bài; không xóa dữ liệu app. Kiểm tra khóa ngoại/cascade, JSON genres, UTC, quyền review, watchlist, vòng gọi công cụ ADK, lịch sử/phiên riêng, xếp hạng, lọc TMDB và lỗi model.
 
+Bộ test bổ sung kiểm tra ADK Runner thật với `BaseLlm` giả lập, giới hạn lượt gọi model, sửa đối số tool, đóng client khi lỗi, cookie bị sửa, hết hạn/giới hạn phiên và luồng FastAPI → agent → tool → SQLite. Các HTTP transport thật bị chặn trong test để không gọi Gemini/TMDB ngoài mạng.
+
+Để cài công cụ đo coverage và chạy:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+.\.venv\Scripts\python.exe -m pytest --cov=backend --cov-report=term-missing
+```
+
+Xem [hướng dẫn và phạm vi từng file test](tests/README.md). Coverage đo các dòng code đã chạy, không phải độ chính xác gợi ý của AI.
+
 Kiểm tra trình duyệt tùy chọn (Node.js, web đang chạy với danh mục mẫu):
 
 ```powershell
