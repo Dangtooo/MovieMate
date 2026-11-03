@@ -22,7 +22,7 @@ powershell -ExecutionPolicy Bypass -File .\run.ps1
 
 Mở **http://127.0.0.1:8000**, tài liệu API **http://127.0.0.1:8000/docs**. Dừng web bằng `Ctrl+C`.
 
-Script tạo môi trường Python nếu thiếu, cài dependencies đã khóa phiên bản, tạo `.env` với khóa phiên ngẫu nhiên nếu chưa có, tạo bảng và thêm 24 phim mẫu mà không ghi đè dữ liệu. Database là **`data/moviemate.db`**; không cần chạy một dịch vụ database riêng. Đường dẫn tương đối trong `DATABASE_URL` được tính từ thư mục dự án.
+Script tạo môi trường Python nếu thiếu, cài dependencies đã khóa phiên bản và tự cập nhật môi trường khi `requirements.lock.txt` thay đổi (kể cả khi `.venv` đã tồn tại). Lần cập nhật thư viện cần Internet. Script cũng tạo `.env` với khóa phiên ngẫu nhiên nếu chưa có, tạo bảng và thêm 24 phim mẫu mà không ghi đè dữ liệu. Database là **`data/moviemate.db`**; không cần chạy một dịch vụ database riêng. Đường dẫn tương đối trong `DATABASE_URL` được tính từ thư mục dự án.
 
 Chạy thủ công trên Windows nếu cần:
 
