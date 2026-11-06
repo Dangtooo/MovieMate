@@ -39,6 +39,7 @@ not a measure of recommendation relevance or production readiness.
 | `test_adk_lifecycle.py` | Real ADK Runner with a scripted BaseLlm, tool corrections, model-call budget, history truncation, hidden thought handling, client cleanup, end-to-end HTTP/tool/SQLite flow |
 | `test_tool_validation.py` | Invalid or contradictory model filter arguments rejected before retrieval |
 | `test_tmdb_transport.py` | Mock HTTP response boundary, cache expiry/languages, sanitized failures, optional video failure |
+| `test_container_start.py` | Render origin defaults, HTTPS cookie configuration, signing secret/port validation, optional seed and single-worker startup |
 
 Run only the new ADK lifecycle checks:
 
