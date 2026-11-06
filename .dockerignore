@@ -1,0 +1,19 @@
+# Only application source and the dependency lock are sent to the builder.
+# In particular .env, local databases, report assets, and Render secret files
+# are excluded even if they exist in the repository/build context.
+*
+!Dockerfile
+!.dockerignore
+!requirements.lock.txt
+!backend/
+!backend/**
+!frontend/
+!frontend/**
+!scripts/
+!scripts/container_start.py
+**/__pycache__/
+**/*.pyc
+**/.env
+**/*.db
+**/*.db-shm
+**/*.db-wal

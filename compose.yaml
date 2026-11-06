@@ -1,0 +1,23 @@
+services:
+  moviemate:
+    build: .
+    image: moviemate:local
+    init: true
+    ports:
+      - "127.0.0.1:8000:10000"
+    environment:
+      PORT: "10000"
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in your local .env first}
+      TMDB_ACCESS_TOKEN: ${TMDB_ACCESS_TOKEN:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash-lite}
+      AI_PROVIDER: gemini
+      DATABASE_URL: sqlite:////var/data/moviemate/moviemate.db
+      COOKIE_SECURE: "false"
+      ALLOWED_ORIGINS: http://localhost:8000,http://127.0.0.1:8000
+      SEED_DEMO_DATA: "true"
+    volumes:
+      - moviemate-data:/var/data
+
+volumes:
+  moviemate-data:

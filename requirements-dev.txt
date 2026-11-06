@@ -1,0 +1,2 @@
+-r requirements.lock.txt
+pytest-cov==7.1.0
