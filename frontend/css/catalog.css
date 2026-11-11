@@ -1,0 +1,340 @@
+.catalog {
+  padding-top: 35px;
+  padding-bottom: 68px;
+}
+.section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+}
+.muted {
+  color: #899583;
+  font-size: 8px;
+  letter-spacing: 2px;
+}
+.section-heading h2 {
+  font-family: var(--serif);
+  font-size: 35px;
+  letter-spacing: -0.6px;
+  line-height: 1.4;
+  margin-top: 7px;
+}
+.catalog-status {
+  font-size: 10px;
+  color: #9eaa94;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding-bottom: 7px;
+}
+.catalog-status:before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  background: var(--accent);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.toolbar {
+  display: flex;
+  gap: 12px;
+  margin: 26px 0 20px;
+}
+.search-field {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  background: #161b17;
+  border-radius: 4px;
+  gap: 13px;
+  height: 47px;
+  padding: 0 16px;
+}
+.search-field > span {
+  font-size: 26px;
+  line-height: 1;
+  color: #a7b29d;
+}
+.search-field input {
+  border: 0;
+  background: none;
+  width: 100%;
+  outline: none;
+  color: var(--text);
+  font-size: 12px;
+  height: 100%;
+}
+input::placeholder,
+textarea::placeholder {
+  color: #727e70;
+}
+.search-field:focus-within {
+  border-color: #8f9a77;
+}
+.search-field kbd {
+  border: 1px solid #3e483b;
+  border-radius: 3px;
+  color: #838f7b;
+  font-size: 10px;
+  padding: 0 6px;
+}
+.select-field {
+  height: 47px;
+  display: flex;
+  align-items: center;
+  background: #161b17;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0 12px;
+  gap: 8px;
+}
+.select-field select {
+  color: #c0c8ba;
+  outline: none;
+  background: transparent;
+  border: 0;
+  font-size: 11px;
+  cursor: pointer;
+  max-width: 180px;
+}
+.select-field option {
+  background: var(--surface);
+}
+.sort-field > span {
+  font-size: 14px;
+  color: #a3b08d;
+}
+.genre-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding-bottom: 5px;
+}
+.genre-chip {
+  font-size: 10px;
+  white-space: nowrap;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 7px 13px;
+  color: #a1ac9b;
+  transition: all 0.15s;
+}
+.genre-chip:hover {
+  border-color: #7b876c;
+  color: var(--text);
+}
+.genre-chip.active {
+  color: var(--accent);
+  border-color: #7f9250;
+  background: #c9e7830d;
+}
+.genre-chip:disabled {
+  opacity: 0.3;
+}
+.notice {
+  background: #d7e69a0b;
+  border: 1px solid #d7e69a26;
+  border-radius: 4px;
+  font-size: 12px;
+  padding: 13px 16px;
+  margin-top: 16px;
+  color: #bfcca9;
+}
+.results-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 47px;
+  color: #7f8c7b;
+  font-size: 10px;
+}
+.text-button {
+  padding: 4px 0;
+  color: var(--accent);
+  font-size: 11px;
+}
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 30px 20px;
+}
+.movie-card {
+  min-width: 0;
+  position: relative;
+}
+.poster-wrap {
+  position: relative;
+  aspect-ratio: 2/3;
+  background: var(--surface);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.poster-button {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  display: block;
+  text-align: left;
+}
+.poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition:
+    transform 0.4s,
+    opacity 0.3s;
+}
+.poster-button:hover .poster {
+  transform: scale(1.045);
+  opacity: 0.78;
+}
+.poster-wrap:after {
+  content: "";
+  position: absolute;
+  inset: 55% 0 0;
+  background: linear-gradient(transparent, #0009);
+  pointer-events: none;
+}
+.rating-pill {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  z-index: 1;
+  font-size: 11px;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  background: #161a17d9;
+  backdrop-filter: blur(8px);
+  padding: 3px 7px;
+  border-radius: 3px;
+}
+.rating-pill span {
+  color: var(--accent);
+  font-size: 10px;
+}
+.save-movie {
+  position: absolute;
+  right: 9px;
+  top: 9px;
+  z-index: 2;
+  background: #151a16cf;
+  width: 29px;
+  height: 29px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #c0c9b42b;
+  border-radius: 4px;
+  font-size: 21px;
+  line-height: 1;
+  backdrop-filter: blur(5px);
+  transition: all 0.15s;
+}
+.save-movie:hover,
+.save-movie.saved {
+  background: var(--accent);
+  color: var(--accent-dark);
+}
+.watched-badge {
+  position: absolute;
+  bottom: 12px;
+  right: 8px;
+  z-index: 2;
+  font-size: 8px;
+  color: var(--accent);
+  background: #151a16cc;
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+.movie-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 11px;
+  display: block;
+  text-align: left;
+  padding: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.5;
+}
+.movie-title:hover {
+  color: var(--accent);
+}
+.movie-meta {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  color: #87917f;
+  font-size: 10px;
+  margin-top: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.movie-meta .genre-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.review-count {
+  font-size: 9px;
+  color: #78856f;
+  margin-top: 6px;
+}
+.skeleton .poster-wrap,
+.skeleton-line {
+  background: linear-gradient(100deg, #1b221b 20%, #252d23 45%, #1b221b 70%);
+  background-size: 250% 100%;
+  animation: shimmer 1.4s infinite;
+}
+.skeleton-line {
+  height: 12px;
+  margin-top: 13px;
+  border-radius: 3px;
+  width: 75%;
+}
+.skeleton-line.short {
+  width: 48%;
+  height: 8px;
+  margin-top: 9px;
+}
+@keyframes shimmer {
+  to {
+    background-position: -170% 0;
+  }
+}
+.empty-state {
+  text-align: center;
+  padding: 60px 10px 35px;
+}
+.empty-state > span {
+  font-size: 45px;
+  color: var(--accent);
+}
+.empty-state h3 {
+  font: 27px var(--serif);
+  margin: 12px 0;
+}
+.empty-state p {
+  color: var(--muted);
+  margin-bottom: 25px;
+}
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 34px;
+}
+.pagination > span {
+  font-size: 11px;
+  color: var(--muted);
+}
+.pagination .button {
+  font-size: 10px;
+  min-height: 36px;
+  padding: 8px 13px;
+}

@@ -1,0 +1,100 @@
+.header {
+  height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 64px;
+  border-bottom: 1px solid #ffffff0c;
+  position: relative;
+  z-index: 5;
+  background: var(--bg);
+  gap: 28px;
+}
+.brand {
+  font-size: 27px;
+  letter-spacing: -1.2px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+.brand-dot {
+  color: var(--accent);
+}
+.brand-mark {
+  width: 32px;
+  height: 32px;
+  font: italic 44px/26px var(--serif);
+  color: var(--accent);
+  position: relative;
+  margin-right: 9px;
+  transform: rotate(-12deg);
+}
+.brand-mark span {
+  position: absolute;
+  right: 0;
+  top: -7px;
+  font: 20px var(--sans);
+}
+.header nav {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  height: 100%;
+}
+.nav-link {
+  color: #a4aca2;
+  height: 100%;
+  position: relative;
+  font-size: 13px;
+  padding: 0;
+  white-space: nowrap;
+}
+.nav-link.active {
+  color: var(--text);
+}
+.nav-link.active:after {
+  content: "";
+  position: absolute;
+  bottom: 18px;
+  height: 2px;
+  width: 16px;
+  background: var(--accent);
+  left: 0;
+}
+.nav-link:hover {
+  color: var(--accent);
+}
+.tiny-dot {
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.new-tag {
+  font-size: 9px;
+  background: #d7e69a19;
+  color: var(--accent);
+  padding: 2px 5px;
+  margin-left: 4px;
+  letter-spacing: 0.6px;
+}
+.account-button {
+  border: 1px solid #3c4539;
+  border-radius: 5px;
+  padding: 9px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}
+.account-button:hover {
+  border-color: var(--accent);
+}
+.user-icon {
+  color: var(--accent);
+  font-size: 18px;
+}

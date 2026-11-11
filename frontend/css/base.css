@@ -1,0 +1,167 @@
+@font-face {
+  font-family: "Noto Sans";
+  src: url("/static/assets/fonts/NotoSans-Variable.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+.chat-provider-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.chat-provider-bar label {
+  font-size: 10px;
+  color: var(--muted);
+}
+.chat-provider-bar select {
+  flex: 1;
+  padding: 7px;
+  border: 1px solid #45543b;
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 11px;
+  max-width: 230px;
+}
+.chat-provider-bar p {
+  flex-basis: 100%;
+  font-size: 9px;
+  line-height: 1.6;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.chat-provider-bar .icon-button {
+  font-size: 18px;
+  width: 24px;
+  height: 24px;
+}
+.chat-panel .chat-messages {
+  min-height: 0;
+}
+:root {
+  color-scheme: dark;
+  --bg: #101412;
+  --surface: #181e1a;
+  --surface-2: #202720;
+  --line: #2b332d;
+  --text: #f0f0e8;
+  --muted: #9aa498;
+  --accent: #d7e69a;
+  --accent-dark: #18200d;
+  --sans: "Noto Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --serif: var(--sans);
+}
+* {
+  box-sizing: border-box;
+}
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 90px;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.6 var(--sans);
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+button {
+  cursor: pointer;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button {
+  color: inherit;
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+button {
+  border: 0;
+  background: none;
+}
+input,
+select,
+textarea {
+  min-width: 0;
+}
+img {
+  display: block;
+  max-width: 100%;
+}
+[hidden] {
+  display: none !important;
+}
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+h1,
+h2,
+h3 {
+  font-weight: 500;
+}
+::selection {
+  background: var(--accent);
+  color: var(--accent-dark);
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.skip-link {
+  position: fixed;
+  top: -70px;
+  left: 20px;
+  background: var(--accent);
+  color: #111;
+  padding: 10px;
+  z-index: 100;
+}
+.skip-link:focus {
+  top: 10px;
+}
+.section-wrap {
+  max-width: 1440px;
+  margin-inline: auto;
+  padding-inline: 64px;
+}
