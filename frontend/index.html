@@ -15,8 +15,17 @@
       type="image/svg+xml"
     />
     <link rel="preload" href="/static/assets/fonts/NotoSans-Variable.ttf" as="font" type="font/ttf" crossorigin />
-    <link rel="stylesheet" href="/static/styles.css?v=moviemate-noto-1" />
-    <script src="/static/app.js?v=adk-1" defer></script>
+    <link rel="stylesheet" href="/static/styles.css?v=split-1" />
+    <!-- Deferred classic scripts share core state and execute in this order. -->
+    <script src="/static/js/core.js?v=split-1" defer></script>
+    <script src="/static/js/features/catalog.js?v=split-1" defer></script>
+    <script src="/static/js/features/auth.js?v=split-1" defer></script>
+    <script src="/static/js/features/watchlist.js?v=split-1" defer></script>
+    <script src="/static/js/features/movie-detail.js?v=split-1" defer></script>
+    <script src="/static/js/features/reviews.js?v=split-1" defer></script>
+    <script src="/static/js/features/chat.js?v=split-1" defer></script>
+    <script src="/static/js/events.js?v=split-1" defer></script>
+    <script src="/static/js/app.js?v=split-1" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#catalog">Đến danh sách phim</a>
